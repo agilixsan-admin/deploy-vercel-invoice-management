@@ -1,0 +1,1203 @@
+/* Global Pages Styling - POSAgilix */
+
+/* ------------------------------------------------------------- */
+/* 1. Dashboard Styles                                           */
+/* ------------------------------------------------------------- */
+.dashboard {
+  width: 100%;
+}
+
+.dashboard-date {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-card-danger {
+  border-color: #fecaca;
+  background: #fff;
+}
+
+.stat-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.stat-card-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-card-icon {
+  color: var(--text-muted);
+}
+
+.stat-card-icon-danger {
+  color: var(--red-primary);
+}
+
+.stat-card-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.stat-card-value-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.stat-card-value-row .stat-card-value {
+  margin-bottom: 0;
+}
+
+.stat-card-trend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.trend-up {
+  color: var(--blue-primary);
+}
+
+.trend-down {
+  color: var(--red-primary);
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.dashboard-charts {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 16px;
+}
+
+.chart-card {
+  padding: 20px;
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.chart-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.chart-wrapper {
+  width: 100%;
+}
+
+.chart-tooltip {
+  background: #1a202c;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.chart-tooltip-label {
+  color: #a0aec0;
+  margin-bottom: 2px;
+}
+
+.chart-tooltip-value {
+  font-weight: 600;
+}
+
+.attention-card {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.attention-header {
+  margin-bottom: 16px;
+}
+
+.attention-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.attention-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--red-primary);
+}
+
+.attention-alert {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.attention-table-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--card-border);
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.attention-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.attention-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.attention-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attention-item-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.attention-item-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.attention-item-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.reminder-btn {
+  font-size: 11px;
+  padding: 5px 10px;
+}
+
+.view-all-btn {
+  width: 100%;
+  text-align: center;
+  margin-top: 12px;
+  padding: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--blue-primary);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.view-all-btn:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-charts {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card-value {
+    font-size: 26px;
+  }
+}
+
+
+/* ------------------------------------------------------------- */
+/* 2. Tenant Management Styles                                   */
+/* ------------------------------------------------------------- */
+.tenant-management {
+  width: 100%;
+}
+
+.table-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  margin-bottom: 0;
+}
+
+.table-count {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.tenant-name {
+  font-weight: 500;
+}
+
+.tenant-email {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.past-due-date {
+  color: var(--red-primary);
+  font-weight: 500;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 16px;
+  margin-top: 8px;
+  border-top: 1px solid var(--card-border);
+}
+
+.table-footer-info {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.search-wrapper {
+  position: relative;
+}
+
+.search-wrapper .search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+}
+
+.search-wrapper .form-control {
+  padding-left: 32px;
+  width: 240px;
+}
+
+@media (max-width: 640px) {
+  .search-wrapper .form-control {
+    width: 100%;
+  }
+
+  .table-footer {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+}
+
+
+/* ------------------------------------------------------------- */
+/* 3. User Management Styles                                     */
+/* ------------------------------------------------------------- */
+.user-management {
+  width: 100%;
+}
+
+.user-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.user-email {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.user-tenant {
+  font-size: 12px;
+  color: var(--text-secondary);
+  max-width: 200px;
+}
+
+.user-last-login {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+
+/* ------------------------------------------------------------- */
+/* 4. Invoice & Billing Styles                                   */
+/* ------------------------------------------------------------- */
+.invoice-billing {
+  width: 100%;
+}
+
+.invoice-filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.filter-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding: 5px 24px 5px 8px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--border-radius);
+  font-size: 12px;
+  color: var(--text-primary);
+  background-color: #ffffff;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+}
+
+.filter-select:focus {
+  border-color: var(--blue-primary);
+}
+
+.invoice-export-btn {
+  margin-left: auto;
+}
+
+.invoice-id {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.invoice-id-link {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--blue-primary);
+  font-size: 12px;
+  font-family: monospace;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: var(--transition);
+}
+
+.invoice-id-link:hover {
+  color: #1d4ed8;
+}
+
+.invoice-amount {
+  font-weight: 500;
+}
+
+.modal-error-alert {
+  padding: 8px 12px;
+  background-color: var(--red-light);
+  color: var(--red-primary);
+  border-radius: var(--border-radius);
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.success-modal {
+  text-align: center;
+  padding: 32px 24px;
+  max-width: 420px;
+}
+
+.success-icon-wrapper {
+  margin-bottom: 12px;
+  color: var(--green-primary);
+  display: flex;
+  justify-content: center;
+}
+
+.success-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.success-message {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.success-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+
+/* ------------------------------------------------------------- */
+/* 5. Invoice Detail Styles                                      */
+/* ------------------------------------------------------------- */
+.invoice-detail {
+  max-width: 1000px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
+.breadcrumb-back {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 13px;
+  padding: 0;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+.breadcrumb-back:hover {
+  color: var(--text-primary);
+}
+
+.breadcrumb-sep {
+  display: flex;
+  align-items: center;
+}
+
+.breadcrumb-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.breadcrumb-link:hover {
+  color: var(--blue-primary);
+}
+
+.breadcrumb-arrow {
+  color: var(--text-muted);
+}
+
+.breadcrumb-current {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.invoice-card {
+  padding: 28px;
+}
+
+.invoice-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.invoice-status-badge {
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.invoice-number {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.invoice-amount-section {
+  text-align: right;
+}
+
+.invoice-amount-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.invoice-amount-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--blue-primary);
+  margin-bottom: 4px;
+}
+
+.invoice-due-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.invoice-divider {
+  height: 1px;
+  background: var(--card-border);
+  margin: 20px 0;
+}
+
+.invoice-parties {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.invoice-party-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.invoice-party-company {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.invoice-party-info {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.invoice-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0;
+}
+
+.invoice-items-table th {
+  text-align: left;
+  padding: 10px 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.invoice-items-table td {
+  padding: 14px 0;
+  font-size: 13px;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.invoice-items-table .text-center {
+  text-align: center;
+}
+
+.invoice-items-table .text-right {
+  text-align: right;
+}
+
+.invoice-items-table th.text-center {
+  text-align: center;
+}
+
+.invoice-items-table th.text-right {
+  text-align: right;
+}
+
+.invoice-totals {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.invoice-totals-rows {
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.invoice-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.invoice-total-label {
+  color: var(--text-secondary);
+}
+
+.invoice-total-value {
+  color: var(--text-secondary);
+}
+
+.invoice-grand-total {
+  padding-top: 8px;
+  border-top: 1px solid var(--card-border);
+}
+
+.invoice-grand-total .invoice-total-label {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.invoice-grand-value {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--blue-primary);
+}
+
+.invoice-notes {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: var(--border-radius);
+  border-left: 3px solid var(--blue-primary);
+}
+
+.invoice-notes-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.invoice-notes-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 640px) {
+  .invoice-card {
+    padding: 16px;
+  }
+
+  .invoice-card-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .invoice-amount-section {
+    text-align: left;
+  }
+
+  .invoice-parties {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .invoice-totals-rows {
+    width: 100%;
+  }
+}
+
+
+/* ------------------------------------------------------------- */
+/* 6. Audit Trail Styles                                         */
+/* ------------------------------------------------------------- */
+.audit-trail {
+  width: 100%;
+}
+
+.audit-header {
+  margin-bottom: 20px;
+}
+
+.audit-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.date-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.date-select-wrapper .date-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.date-select {
+  padding-left: 30px;
+  height: 36px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--border-radius);
+}
+
+.audit-search .search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+}
+
+.audit-search .form-control {
+  padding-left: 32px;
+  width: 240px;
+  height: 36px;
+}
+
+.audit-export-btn {
+  height: 36px;
+  padding: 0 14px;
+}
+
+.audit-table th {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.audit-timestamp {
+  font-family: 'Inter', monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.audit-user {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.audit-target {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.audit-ip {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.audit-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.audit-badge-icon {
+  flex-shrink: 0;
+}
+
+.action-badge-locked {
+  background: #ffe4e6;
+  color: #e11d48;
+}
+
+.action-badge-posted {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.action-badge-reset {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.action-badge-subscription {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.action-badge-backup {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.pagination-ellipsis {
+  padding: 0 6px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .audit-top-actions {
+    width: 100%;
+  }
+
+  .audit-search .form-control {
+    width: 100%;
+  }
+}
+
+/* ------------------------------------------------------------- */
+/* 7. Login Page Styles (Premium Glassmorphism)                  */
+/* ------------------------------------------------------------- */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0f172a; /* Dark slate background */
+  position: relative;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+.login-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.login-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.6;
+}
+
+.blob-1 {
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  animation: float 10s infinite ease-in-out alternate;
+}
+
+.blob-2 {
+  bottom: -10%;
+  right: -10%;
+  width: 40vw;
+  height: 40vw;
+  background: linear-gradient(135deg, #ef4444, #f59e0b);
+  animation: float 12s infinite ease-in-out alternate-reverse;
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(50px, 50px) scale(1.1);
+  }
+}
+
+.login-card {
+  position: relative;
+  z-index: 1;
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 48px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.login-logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.5);
+}
+
+.login-logo h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #f8fafc;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.login-subtitle {
+  color: #94a3b8;
+  font-size: 14px;
+  margin: 0;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login-input-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #cbd5e1;
+}
+
+.login-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-input-icon {
+  position: absolute;
+  left: 16px;
+  color: #64748b;
+  font-size: 18px;
+  transition: color 0.3s ease;
+}
+
+.login-input-wrapper input {
+  width: 100%;
+  padding: 14px 16px 14px 44px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  color: #f8fafc;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  outline: none;
+}
+
+.login-input-wrapper input::placeholder {
+  color: #475569;
+}
+
+.login-input-wrapper input:focus {
+  border-color: #3b82f6;
+  background: rgba(15, 23, 42, 0.8);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.login-input-wrapper input:focus + .login-input-icon,
+.login-input-wrapper input:not(:placeholder-shown) + .login-input-icon {
+  color: #3b82f6;
+}
+
+.login-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -4px;
+}
+
+.login-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.login-checkbox input {
+  accent-color: #3b82f6;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.login-checkbox span {
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.login-forgot {
+  font-size: 13px;
+  color: #60a5fa;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.login-forgot:hover {
+  color: #93c5fd;
+  text-decoration: underline;
+}
+
+.login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.login-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+.login-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.login-button-icon {
+  transition: transform 0.3s ease;
+}
+
+.login-button:hover:not(:disabled) .login-button-icon {
+  transform: translateX(4px);
+}
+
+.login-footer {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.login-footer a {
+  color: #f8fafc;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.login-footer a:hover {
+  color: #60a5fa;
+}
+
+@media (max-width: 640px) {
+  .login-card {
+    padding: 32px 24px;
+    margin: 16px;
+    border-radius: 20px;
+  }
+}
