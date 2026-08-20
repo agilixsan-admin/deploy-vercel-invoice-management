@@ -49,6 +49,8 @@
     pointer-events: none;
     transform: translateX(-10px);
     white-space: nowrap;
+    position: absolute;
+    visibility: hidden;
   }
 
   .sidebar.collapsed .sidebar-header {
