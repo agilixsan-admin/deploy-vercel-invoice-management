@@ -1214,3 +1214,63 @@
     border-radius: 20px;
   }
 }
+
+/* ===== SKELETON LOADER ===== */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: #f1f5f9;
+  background-image: linear-gradient(
+    90deg, 
+    #f1f5f9 0px, 
+    #e2e8f0 40px, 
+    #f1f5f9 80px
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear forwards;
+  border-radius: 4px;
+}
+
+.skeleton-text {
+  height: 14px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.skeleton-title {
+  height: 24px;
+  width: 200px;
+  margin-bottom: 16px;
+}
+
+.skeleton-card {
+  height: 120px;
+  width: 100%;
+  border-radius: 12px;
+}
+
+.skeleton-table-row {
+  height: 48px;
+  width: 100%;
+  margin-bottom: 8px;
+  border-radius: 8px;
+}
+
+.skeleton-chart {
+  height: 260px;
+  width: 100%;
+  border-radius: 12px;
+}
+
+.skeleton-button {
+  height: 36px;
+  width: 120px;
+  border-radius: 8px;
+}
