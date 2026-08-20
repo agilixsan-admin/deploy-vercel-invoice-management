@@ -9,12 +9,20 @@ import InvoiceDetail from './pages/invoicedetail/invoicedetail';
 import Login from './pages/login/login';
 import './App.css';
 
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Layout />}>
+        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="tenant-management" element={<TenantManagement />} />
