@@ -14,10 +14,17 @@ function AddUserModal({ onClose, onSubmit }) {
     status: 'Active',
   });
 
-  const handleSubmit = (e) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email) return;
-    onSubmit(form);
+    setIsSubmitting(true);
+    try {
+      await onSubmit(form);
+    } catch (err) {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -99,8 +106,8 @@ function AddUserModal({ onClose, onSubmit }) {
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
-              Create User
+            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating...' : 'Create User'}
             </button>
           </div>
         </form>
@@ -118,9 +125,16 @@ function EditUserModal({ user, onClose, onSubmit }) {
     status: user.status,
   });
 
-  const handleSubmit = (e) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(user.id, form);
+    setIsSubmitting(true);
+    try {
+      await onSubmit(user.id, form);
+    } catch (err) {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -182,8 +196,8 @@ function EditUserModal({ user, onClose, onSubmit }) {
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
-              Save Changes
+            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
@@ -217,6 +231,19 @@ function UserManagement() {
     handleEditUser,
     handleDeleteUser,
   } = useUsers();
+
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const onDeleteConfirm = async () => {
+    setIsDeleting(true);
+    try {
+      await handleDeleteUser(deletingUserId);
+    } catch (err) {
+      // error handled
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="user-management">
@@ -375,8 +402,12 @@ function UserManagement() {
               <button className="btn btn-secondary" onClick={() => setDeletingUserId(null)}>
                 Cancel
               </button>
-              <button className="btn btn-danger" onClick={() => handleDeleteUser(deletingUserId)}>
-                Delete User
+              <button
+                className="btn btn-danger"
+                onClick={onDeleteConfirm}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete User'}
               </button>
             </div>
           </div>

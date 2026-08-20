@@ -128,10 +128,16 @@ function EditTenantModal({ tenant, onClose, onSubmit }) {
     outlets: tenant.outletCount || tenant.outlets,
     expiryDate: tenant.expiryDate,
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(tenant.id, form);
+    setIsSubmitting(true);
+    try {
+      await onSubmit(tenant.id, form);
+    } catch (err) {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -210,8 +216,8 @@ function EditTenantModal({ tenant, onClose, onSubmit }) {
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
-              Save Changes
+            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
@@ -249,6 +255,19 @@ function TenantManagement() {
     handleToggleLock,
     handleDeleteTenant,
   } = useTenants();
+
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const onDeleteConfirm = async () => {
+    setIsDeleting(true);
+    try {
+      await handleDeleteTenant(deletingTenantId);
+    } catch (err) {
+      // error handled
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
@@ -423,9 +442,10 @@ function TenantManagement() {
               </button>
               <button
                 className="btn btn-danger"
-                onClick={() => handleDeleteTenant(deletingTenantId)}
+                onClick={onDeleteConfirm}
+                disabled={isDeleting}
               >
-                Delete Tenant
+                {isDeleting ? 'Deleting...' : 'Delete Tenant'}
               </button>
             </div>
           </div>
