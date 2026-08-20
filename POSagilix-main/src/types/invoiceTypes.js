@@ -35,9 +35,8 @@ export function buildUpdateInvoiceStatusRequestBody(id, status) {
 
 export function buildInvoiceFilterQueryParams(params = {}) {
   const query = {
-    search: params.search || '',
     page: params.page || 1,
-    limit: params.limit || 10,
+    limit: params.limit || 50, // Fetch more to allow client-side search/pagination
   };
 
   if (params.status && params.status !== 'All Invoices') {

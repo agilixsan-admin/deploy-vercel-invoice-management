@@ -124,16 +124,27 @@ export function useInvoices(invoiceId = null) {
     setTimeout(() => setToastMessage(''), 3000);
   };
 
+  // Client-side search filtering (since backend doesn't support search param)
+  const filteredInvoices = invoices.filter(inv => {
+    if (!searchTerm) return true;
+    const lowerSearch = searchTerm.toLowerCase();
+    return (
+      inv.invoiceNumber?.toLowerCase().includes(lowerSearch) ||
+      inv.tenant?.businessName?.toLowerCase().includes(lowerSearch) ||
+      inv.tenantId?.toLowerCase().includes(lowerSearch)
+    );
+  });
+
   // Pagination calculation
-  const totalPages = Math.ceil(invoices.length / itemsPerPage) || 1;
-  const paginatedInvoices = invoices.slice(
+  const totalPages = Math.ceil(filteredInvoices.length / itemsPerPage) || 1;
+  const paginatedInvoices = filteredInvoices.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
   return {
     invoices: paginatedInvoices,
-    totalCount: invoices.length,
+    totalCount: filteredInvoices.length,
     currentInvoice,
     loading,
     searchTerm,
