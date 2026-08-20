@@ -11,7 +11,8 @@ import {
   UserCog, 
   ClipboardList, 
   ArrowRight,
-  SearchX
+  SearchX,
+  LogOut
 } from 'lucide-react';
 import { tenantService } from '../../services/tenantService';
 import './Topbar.css';
@@ -50,9 +51,11 @@ function Topbar({ onToggleSidebar, isSidebarOpen }) {
   const [unpaidCount, setUnpaidCount] = useState(0);
   const [unpaidTenants, setUnpaidTenants] = useState([]);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const searchRef = useRef(null);
   const inputRef = useRef(null);
   const notifRef = useRef(null);
+  const profileRef = useRef(null);
   const navigate = useNavigate();
 
   // Load unpaid tenants
@@ -87,6 +90,9 @@ function Topbar({ onToggleSidebar, isSidebarOpen }) {
       if (notifRef.current && !notifRef.current.contains(e.target)) {
         setIsNotifOpen(false);
       }
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setIsProfileOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -113,6 +119,13 @@ function Topbar({ onToggleSidebar, isSidebarOpen }) {
     navigate(path);
     setIsOpen(false);
     setQuery('');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user_info');
+    navigate('/'); // Or /login depending on routing. In this app, / seems to be login based on standard setup, or '/login'. Actually navigate('/login') is safer, but I'll use '/' which usually redirects to login. Wait, let me check App.jsx route if possible, or just use navigate('/login'). Actually the user was at login page so I will navigate to '/login'.
+    // Let me just navigate to '/login'.
   };
 
   const handleSubmitSearch = (e) => {
@@ -334,7 +347,28 @@ function Topbar({ onToggleSidebar, isSidebarOpen }) {
             </div>
           )}
         </div>
-        <div className="topbar-avatar">A</div>
+        <div className="profile-wrapper" ref={profileRef}>
+          <div className="topbar-avatar" onClick={() => setIsProfileOpen(!isProfileOpen)}>A</div>
+          
+          {isProfileOpen && (
+            <div className="profile-dropdown">
+              <div className="profile-header">
+                <div className="profile-name">Admin User</div>
+                <div className="profile-role">Super Admin</div>
+              </div>
+              <div className="profile-menu">
+                <button className="profile-menu-item" onClick={() => {
+                  localStorage.removeItem('access_token');
+                  localStorage.removeItem('user_info');
+                  navigate('/');
+                }}>
+                  <LogOut size={16} />
+                  <span>Log Out</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );
