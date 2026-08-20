@@ -25,6 +25,7 @@ export function useInvoices(invoiceId = null) {
   // Modals & toast state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [successModalData, setSuccessModalData] = useState(null);
 
   // Sync state with URL params
   useEffect(() => {
@@ -100,11 +101,14 @@ export function useInvoices(invoiceId = null) {
     updateQueryParams({ q: searchTerm, tab });
   };
 
-  const handleCreateInvoice = async (formData) => {
+  const handleCreateInvoice = async (formData, tenantName) => {
     const payload = buildCreateInvoiceRequestBody(formData);
-    await invoiceService.createInvoice(payload);
+    const createdInvoice = await invoiceService.createInvoice(payload);
     setShowCreateModal(false);
-    showToast(`Invoice ${payload.id} created successfully.`);
+    setSuccessModalData({
+      ...createdInvoice,
+      tenantName: tenantName || createdInvoice.tenant?.businessName
+    });
     await loadInvoices();
   };
 
@@ -154,6 +158,8 @@ export function useInvoices(invoiceId = null) {
     itemsPerPage,
     showCreateModal,
     toastMessage,
+    successModalData,
+    setSuccessModalData,
     setSearchTerm: handleSearchChange,
     setActiveTab: handleTabChange,
     setCurrentPage,

@@ -27,6 +27,7 @@ export function useTenants() {
 
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
+  const [successModalData, setSuccessModalData] = useState(null);
   const [editingTenant, setEditingTenant] = useState(null);
   const [deletingTenantId, setDeletingTenantId] = useState(null);
 
@@ -105,8 +106,9 @@ export function useTenants() {
   // CRUD Actions
   const handleAddTenant = async (formData) => {
     const payload = buildCreateTenantRequestBody(formData);
-    await tenantService.createTenant(payload);
+    const createdTenant = await tenantService.createTenant(payload);
     setShowAddModal(false);
+    setSuccessModalData(createdTenant);
     await loadTenants();
   };
 
@@ -153,6 +155,8 @@ export function useTenants() {
     totalPages,
     itemsPerPage,
     showAddModal,
+    successModalData,
+    setSuccessModalData,
     editingTenant,
     deletingTenantId,
     setSearchTerm: handleSearchChange,

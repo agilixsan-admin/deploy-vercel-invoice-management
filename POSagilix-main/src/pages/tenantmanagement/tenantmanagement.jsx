@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Pencil, Lock, ChevronLeft, ChevronRight, X, Unlock } from 'lucide-react';
 import { useTenants } from '../../hooks/useTenants';
 import { getStatusBadgeClass } from '../../lib/formatters';
+import SuccessModal from '../../components/Modal/SuccessModal';
 import '../style.css';
 
 // Add Tenant Modal Component
@@ -225,6 +226,8 @@ function TenantManagement() {
     totalPages,
     itemsPerPage,
     showAddModal,
+    successModalData,
+    setSuccessModalData,
     editingTenant,
     deletingTenantId,
     setSearchTerm,
@@ -421,6 +424,21 @@ function TenantManagement() {
           </div>
         </div>
       )}
+
+      {/* Success Modal */}
+      <SuccessModal
+        isOpen={!!successModalData}
+        onClose={() => setSuccessModalData(null)}
+        title="Tenant Created Successfully"
+        message={
+          <>
+            Tenant <strong>{successModalData?.businessName}</strong> has been created and added to the system.
+          </>
+        }
+        primaryButtonText="Got it"
+        onPrimaryClick={() => setSuccessModalData(null)}
+        secondaryButtonText="Close"
+      />
     </div>
   );
 }

@@ -1,0 +1,83 @@
+.success-modal {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  padding: 32px 24px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  animation: modal-fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.success-icon-wrapper {
+  margin-bottom: 24px;
+}
+
+.success-icon-bg {
+  width: 64px;
+  height: 64px;
+  background-color: #e6f7ef;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-icon {
+  color: #047857;
+}
+
+.success-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 12px 0;
+}
+
+.success-message {
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.5;
+  margin: 0 0 32px 0;
+}
+
+.success-message strong {
+  color: #111827;
+  font-weight: 600;
+}
+
+.success-message .highlight {
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.success-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.success-btn-primary {
+  width: 100%;
+  justify-content: center;
+  padding: 12px;
+  font-weight: 500;
+}
+
+.success-btn-secondary {
+  width: 100%;
+  justify-content: center;
+  padding: 12px;
+  font-weight: 500;
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.success-btn-secondary:hover {
+  background: #f9fafb;
+}

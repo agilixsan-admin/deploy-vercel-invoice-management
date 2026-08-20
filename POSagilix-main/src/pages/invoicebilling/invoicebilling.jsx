@@ -4,6 +4,7 @@ import { Plus, Eye, ChevronLeft, ChevronRight, X, CheckCircle } from 'lucide-rea
 import { useInvoices } from '../../hooks/useInvoices';
 import { useTenants } from '../../hooks/useTenants';
 import { getStatusBadgeClass } from '../../lib/formatters';
+import SuccessModal from '../../components/Modal/SuccessModal';
 import '../style.css';
 
 // Create Invoice Modal Component
@@ -29,7 +30,8 @@ function CreateInvoiceModal({ onClose, onSubmit }) {
       return;
     }
 
-    onSubmit(form);
+    const selectedTenant = tenants.find((t) => t.id === form.tenantId);
+    onSubmit(form, selectedTenant?.businessName);
   };
 
   return (
@@ -126,6 +128,8 @@ function InvoiceBilling() {
     itemsPerPage,
     showCreateModal,
     toastMessage,
+    successModalData,
+    setSuccessModalData,
     setSearchTerm,
     setActiveTab,
     setCurrentPage,
@@ -295,6 +299,25 @@ function InvoiceBilling() {
           onSubmit={handleCreateInvoice}
         />
       )}
+
+      {/* Success Modal */}
+      <SuccessModal
+        isOpen={!!successModalData}
+        onClose={() => setSuccessModalData(null)}
+        title="Invoice Created Successfully"
+        message={
+          <>
+            Invoice <span className="highlight">{successModalData?.invoiceNumber}</span> for{' '}
+            <strong>{successModalData?.tenantName}</strong> has been generated and added to the list.
+          </>
+        }
+        primaryButtonText="View Detail"
+        onPrimaryClick={() => {
+          navigate(`/invoice/${successModalData?.id}`);
+          setSuccessModalData(null);
+        }}
+        secondaryButtonText="Close"
+      />
     </div>
   );
 }
