@@ -9,11 +9,28 @@ import InvoiceDetail from './pages/invoicedetail/invoicedetail';
 import Login from './pages/login/login';
 import './App.css';
 
+const parseJwt = (token) => {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch (e) {
+    return null;
+  }
+};
+
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('access_token');
   if (!token) {
     return <Navigate to="/login" replace />;
   }
+
+  const payload = parseJwt(token);
+  // Check if payload exists and token is expired (exp is in seconds)
+  if (!payload || (payload.exp && payload.exp * 1000 < Date.now())) {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user_info');
+    return <Navigate to="/login" replace />;
+  }
+
   return children;
 };
 
