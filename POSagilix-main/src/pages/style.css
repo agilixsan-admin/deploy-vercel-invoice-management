@@ -1176,6 +1176,19 @@
   transform: translateX(4px);
 }
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
 .login-footer {
   margin-top: 32px;
   text-align: center;

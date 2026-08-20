@@ -56,7 +56,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    await this.userRepository.update(user.id, { lastLoginAt: new Date() });
+    this.userRepository.update(user.id, { lastLoginAt: new Date() }).catch((err) => {
+      console.error('Failed to update lastLoginAt:', err);
+    });
 
     const payload: JwtPayload = {
       sub: user.id,
@@ -76,7 +78,7 @@ export class AuthService {
         '7d') as `${number}${'s' | 'm' | 'h' | 'd'}`,
     });
 
-    await this.auditLogService.log({
+    this.auditLogService.log({
       actorId: user.id,
       action: AuditAction.AUTH_LOGIN,
       targetType: 'User',
@@ -84,6 +86,8 @@ export class AuthService {
       ipAddress: ipAddress ?? null,
       userAgent: userAgent ?? null,
       metadata: { email: user.email },
+    }).catch((err) => {
+      console.error('Failed to write audit log for login:', err);
     });
 
     return {

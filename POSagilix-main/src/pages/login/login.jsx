@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -92,8 +92,17 @@ const Login = () => {
           </div>
 
           <button type="submit" className="login-button" disabled={isLoading}>
-            {isLoading ? 'Signing in...' : 'Sign In'}
-            {!isLoading && <ArrowRight className="login-button-icon" />}
+            {isLoading ? (
+              <>
+                <Loader2 className="login-button-icon animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              <>
+                Sign In
+                <ArrowRight className="login-button-icon" />
+              </>
+            )}
           </button>
         </form>
         
