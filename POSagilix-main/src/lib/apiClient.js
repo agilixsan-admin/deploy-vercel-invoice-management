@@ -7,11 +7,30 @@ const apiClient = axios.create({
   },
 });
 
-// Add a request interceptor to attach the auth token
+// Helper to check if token is expired locally
+const isTokenExpired = (token) => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    // Buffer of 5 seconds to prevent edge cases
+    return payload.exp && payload.exp * 1000 < Date.now() - 5000;
+  } catch (e) {
+    return true; // if parsing fails, assume expired
+  }
+};
+
+// Add a request interceptor to attach the auth token and check expiration
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('access_token');
     if (token) {
+      if (isTokenExpired(token)) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user_info');
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+        return Promise.reject(new Error('Session expired'));
+      }
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
 import Dashboard from './pages/dashboard/dashboard';
 import TenantManagement from './pages/tenantmanagement/tenantmanagement';
@@ -18,9 +18,11 @@ const parseJwt = (token) => {
 };
 
 const ProtectedRoute = ({ children }) => {
+  const location = useLocation(); // Force re-render on route change
+  
   const token = localStorage.getItem('access_token');
   if (!token) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   const payload = parseJwt(token);
