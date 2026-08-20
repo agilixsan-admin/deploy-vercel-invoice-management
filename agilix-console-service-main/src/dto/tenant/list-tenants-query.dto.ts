@@ -57,6 +57,7 @@ export class ListTenantsQueryDto {
     enum: TenantStatus,
   })
   @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
   @IsEnum(TenantStatus)
   status?: TenantStatus;
 
@@ -66,6 +67,7 @@ export class ListTenantsQueryDto {
     enum: PlanType,
   })
   @IsOptional()
+  @Transform(({ value }) => (value === '' ? undefined : value))
   @IsEnum(PlanType)
   planType?: PlanType;
 }
