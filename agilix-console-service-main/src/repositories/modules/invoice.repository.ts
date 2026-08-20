@@ -37,6 +37,7 @@ export class InvoiceRepository {
 
     const qb = this.repo
       .createQueryBuilder('invoice')
+      .leftJoinAndSelect('invoice.tenant', 'tenant')
       .orderBy('invoice.createdAt', 'DESC')
       .take(limit)
       .skip(offset);
