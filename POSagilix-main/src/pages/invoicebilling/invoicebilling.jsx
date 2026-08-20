@@ -206,11 +206,13 @@ function InvoiceBilling() {
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={7} className="table-empty">
-                    Loading invoices...
-                  </td>
-                </tr>
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`}>
+                    <td colSpan={7} style={{ padding: '8px 16px' }}>
+                      <div className="skeleton skeleton-table-row"></div>
+                    </td>
+                  </tr>
+                ))
               ) : invoices.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="table-empty">

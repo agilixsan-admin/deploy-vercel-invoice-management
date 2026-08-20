@@ -71,11 +71,13 @@ function AuditTrail() {
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={5} className="table-empty">
-                    Loading audit trail logs...
-                  </td>
-                </tr>
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`}>
+                    <td colSpan={5} style={{ padding: '8px 16px' }}>
+                      <div className="skeleton skeleton-table-row"></div>
+                    </td>
+                  </tr>
+                ))
               ) : logs.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="table-empty">

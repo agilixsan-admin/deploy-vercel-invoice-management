@@ -273,11 +273,13 @@ function UserManagement() {
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={6} className="table-empty">
-                    Loading users data...
-                  </td>
-                </tr>
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`}>
+                    <td colSpan={6} style={{ padding: '8px 16px' }}>
+                      <div className="skeleton skeleton-table-row"></div>
+                    </td>
+                  </tr>
+                ))
               ) : users.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="table-empty">

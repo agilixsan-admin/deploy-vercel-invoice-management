@@ -31,7 +31,29 @@ function Dashboard() {
   } = useDashboard();
 
   if (loading) {
-    return <div className="dashboard-loading">Loading dashboard metrics...</div>;
+    return (
+      <div className="dashboard">
+        <div className="page-header">
+          <div>
+            <div className="skeleton skeleton-title"></div>
+            <div className="skeleton skeleton-text" style={{ width: '100px' }}></div>
+          </div>
+          <div className="page-actions">
+            <div className="skeleton skeleton-button"></div>
+            <div className="skeleton skeleton-button"></div>
+          </div>
+        </div>
+        <div className="dashboard-stats">
+          <div className="skeleton skeleton-card"></div>
+          <div className="skeleton skeleton-card"></div>
+          <div className="skeleton skeleton-card"></div>
+        </div>
+        <div className="dashboard-charts">
+          <div className="skeleton skeleton-chart"></div>
+          <div className="skeleton skeleton-chart"></div>
+        </div>
+      </div>
+    );
   }
 
   return (

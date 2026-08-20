@@ -276,11 +276,13 @@ function TenantManagement() {
             </thead>
             <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={6} className="table-empty">
-                    Loading tenants data...
-                  </td>
-                </tr>
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skeleton-${i}`}>
+                    <td colSpan={6} style={{ padding: '8px 16px' }}>
+                      <div className="skeleton skeleton-table-row"></div>
+                    </td>
+                  </tr>
+                ))
               ) : tenants.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="table-empty">
