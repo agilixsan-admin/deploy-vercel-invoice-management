@@ -15,11 +15,18 @@ function AddTenantModal({ onClose, onSubmit }) {
     outlets: 1,
     expiryDate: new Date().toISOString().split('T')[0], // e.g. 2025-11-30
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.businessName || !form.ownerEmail) return;
-    onSubmit(form);
+    
+    setIsSubmitting(true);
+    try {
+      await onSubmit(form);
+    } catch (err) {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -101,8 +108,8 @@ function AddTenantModal({ onClose, onSubmit }) {
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
-              Create Tenant
+            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating...' : 'Create Tenant'}
             </button>
           </div>
         </form>

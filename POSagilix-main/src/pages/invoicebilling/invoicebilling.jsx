@@ -18,8 +18,9 @@ function CreateInvoiceModal({ onClose, onSubmit }) {
     notes: '',
   });
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.tenantId) {
       setError('Please select a tenant.');
@@ -30,8 +31,14 @@ function CreateInvoiceModal({ onClose, onSubmit }) {
       return;
     }
 
+    setIsSubmitting(true);
     const selectedTenant = tenants.find((t) => t.id === form.tenantId);
-    onSubmit(form, selectedTenant?.businessName);
+    try {
+      await onSubmit(form, selectedTenant?.businessName);
+    } catch (err) {
+      setError('An error occurred while generating the invoice.');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -105,8 +112,8 @@ function CreateInvoiceModal({ onClose, onSubmit }) {
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
-              Generate Invoice
+            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Generating...' : 'Generate Invoice'}
             </button>
           </div>
         </form>
