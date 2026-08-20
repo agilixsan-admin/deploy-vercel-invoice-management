@@ -12,9 +12,8 @@ function CreateInvoiceModal({ onClose, onSubmit }) {
   
   const [form, setForm] = useState({
     tenantId: '',
-    billingMonth: 'October',
-    billingYear: '2024',
-    amount: '2.500.000',
+    billingPeriod: new Date().toISOString().slice(0, 7), // YYYY-MM
+    amount: '',
     notes: '',
   });
   const [error, setError] = useState('');
@@ -61,45 +60,17 @@ function CreateInvoiceModal({ onClose, onSubmit }) {
               ))}
             </select>
           </div>
-          <div className="select-row">
-            <div className="form-group">
-              <label className="form-label">Billing Month</label>
-              <select
-                className="form-control form-select"
-                value={form.billingMonth}
-                onChange={(e) => setForm({ ...form, billingMonth: e.target.value })}
-              >
-                {[
-                  'January',
-                  'February',
-                  'March',
-                  'April',
-                  'May',
-                  'June',
-                  'July',
-                  'August',
-                  'September',
-                  'October',
-                  'November',
-                  'December',
-                ].map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Billing Year</label>
-              <select
-                className="form-control form-select"
-                value={form.billingYear}
-                onChange={(e) => setForm({ ...form, billingYear: e.target.value })}
-              >
-                <option value="2024">2024</option>
-                <option value="2023">2023</option>
-              </select>
-            </div>
+          <div className="form-group">
+            <label className="form-label">
+              Billing Period <span className="required">*</span>
+            </label>
+            <input
+              type="month"
+              className="form-control"
+              value={form.billingPeriod}
+              onChange={(e) => setForm({ ...form, billingPeriod: e.target.value })}
+              required
+            />
           </div>
           <div className="form-group">
             <label className="form-label">
@@ -110,7 +81,11 @@ function CreateInvoiceModal({ onClose, onSubmit }) {
               className="form-control"
               placeholder="e.g. 2.500.000"
               value={form.amount}
-              onChange={(e) => setForm({ ...form, amount: e.target.value })}
+              onChange={(e) => {
+                const val = e.target.value.replace(/[^0-9]/g, '');
+                const formatted = val ? new Intl.NumberFormat('id-ID').format(val) : '';
+                setForm({ ...form, amount: formatted });
+              }}
               required
             />
           </div>

@@ -7,9 +7,17 @@ export function buildCreateInvoiceRequestBody(formData) {
     January: '01', February: '02', March: '03', April: '04', May: '05', June: '06',
     July: '07', August: '08', September: '09', October: '10', November: '11', December: '12'
   };
-  const monthStr = monthMap[formData.billingMonth] || '10';
-  const yearStr = formData.billingYear || new Date().getFullYear().toString();
-  const billingPeriod = `${yearStr}-${monthStr}`;
+  
+  let billingPeriod = formData.billingPeriod;
+  let yearStr, monthStr;
+
+  if (billingPeriod) {
+    [yearStr, monthStr] = billingPeriod.split('-');
+  } else {
+    monthStr = monthMap[formData.billingMonth] || '10';
+    yearStr = formData.billingYear || new Date().getFullYear().toString();
+    billingPeriod = `${yearStr}-${monthStr}`;
+  }
 
   const dueDate = `${yearStr}-${monthStr}-15`;
 
