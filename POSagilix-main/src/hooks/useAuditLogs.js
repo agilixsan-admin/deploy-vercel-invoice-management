@@ -2,15 +2,20 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { auditService } from '../services/auditService';
 
+const auditLogsCache = new Map();
+
 export function useAuditLogs() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [logs, setLogs] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   // Search & Filter state
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
   const [selectedDate, setSelectedDate] = useState(searchParams.get('date') || '');
+
+  const getCacheKey = () => `${searchTerm}-${selectedCategory}-${selectedDate}`;
+
+  const [logs, setLogs] = useState(auditLogsCache.get(getCacheKey()) || []);
+  const [loading, setLoading] = useState(!auditLogsCache.has(getCacheKey()));
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,13 +31,17 @@ export function useAuditLogs() {
   }, [searchParams]);
 
   const loadAuditLogs = async () => {
-    setLoading(true);
+    const cacheKey = getCacheKey();
+    if (!auditLogsCache.has(cacheKey)) {
+      setLoading(true);
+    }
     try {
       const data = await auditService.getAuditLogs({
         search: searchTerm,
         category: selectedCategory,
         date: selectedDate,
       });
+      auditLogsCache.set(cacheKey, data);
       setLogs(data);
     } catch (err) {
       console.error('Failed to load audit logs:', err);
@@ -42,6 +51,11 @@ export function useAuditLogs() {
   };
 
   useEffect(() => {
+    const cacheKey = getCacheKey();
+    if (auditLogsCache.has(cacheKey)) {
+      setLogs(auditLogsCache.get(cacheKey));
+      setLoading(false);
+    }
     loadAuditLogs();
   }, [searchTerm, selectedCategory, selectedDate]);
 

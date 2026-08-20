@@ -3,15 +3,20 @@ import { useSearchParams } from 'react-router-dom';
 import { invoiceService } from '../services/invoiceService';
 import { buildCreateInvoiceRequestBody } from '../types/invoiceTypes';
 
+const invoicesCache = new Map();
+
 export function useInvoices(invoiceId = null) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [invoices, setInvoices] = useState([]);
-  const [currentInvoice, setCurrentInvoice] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   // Filters & Tabs state
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'All Invoices');
+
+  const getCacheKey = () => invoiceId ? `invoice-${invoiceId}` : `${searchTerm}-${activeTab}`;
+
+  const [invoices, setInvoices] = useState(invoicesCache.get(getCacheKey()) || []);
+  const [currentInvoice, setCurrentInvoice] = useState(invoiceId ? invoicesCache.get(`detail-${invoiceId}`) : null);
+  const [loading, setLoading] = useState(!invoicesCache.has(getCacheKey()) && !(invoiceId && invoicesCache.has(`detail-${invoiceId}`)));
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,16 +35,23 @@ export function useInvoices(invoiceId = null) {
   }, [searchParams]);
 
   const loadInvoices = async () => {
-    setLoading(true);
+    const cacheKey = getCacheKey();
+    const detailKey = `detail-${invoiceId}`;
+    
+    if (invoiceId && !invoicesCache.has(detailKey)) setLoading(true);
+    if (!invoiceId && !invoicesCache.has(cacheKey)) setLoading(true);
+    
     try {
       if (invoiceId) {
         const detail = await invoiceService.getInvoiceById(invoiceId);
+        invoicesCache.set(detailKey, detail);
         setCurrentInvoice(detail);
       } else {
         const data = await invoiceService.getInvoices({
           search: searchTerm,
           status: activeTab,
         });
+        invoicesCache.set(cacheKey, data);
         setInvoices(data);
       }
     } catch (err) {
@@ -50,6 +62,17 @@ export function useInvoices(invoiceId = null) {
   };
 
   useEffect(() => {
+    const cacheKey = getCacheKey();
+    const detailKey = `detail-${invoiceId}`;
+    
+    if (invoiceId && invoicesCache.has(detailKey)) {
+      setCurrentInvoice(invoicesCache.get(detailKey));
+      setLoading(false);
+    } else if (!invoiceId && invoicesCache.has(cacheKey)) {
+      setInvoices(invoicesCache.get(cacheKey));
+      setLoading(false);
+    }
+    
     loadInvoices();
   }, [invoiceId, searchTerm, activeTab]);
 

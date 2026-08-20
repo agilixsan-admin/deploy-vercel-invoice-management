@@ -6,15 +6,20 @@ import {
   buildUpdateTenantRequestBody,
 } from '../types/tenantTypes';
 
+const tenantsCache = new Map();
+
 export function useTenants() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [tenants, setTenants] = useState([]);
-  const [loading, setLoading] = useState(true);
-
+  
   // Search and Filters state sync with searchParams
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
   const [filterPlan, setFilterPlan] = useState(searchParams.get('plan') || 'all');
   const [filterStatus, setFilterStatus] = useState(searchParams.get('status') || 'all');
+
+  const getCacheKey = () => `${searchTerm}-${filterPlan}-${filterStatus}`;
+  
+  const [tenants, setTenants] = useState(tenantsCache.get(getCacheKey()) || []);
+  const [loading, setLoading] = useState(!tenantsCache.has(getCacheKey()));
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,13 +41,18 @@ export function useTenants() {
   }, [searchParams]);
 
   const loadTenants = async () => {
-    setLoading(true);
+    const cacheKey = getCacheKey();
+    if (!tenantsCache.has(cacheKey)) {
+      setLoading(true);
+    }
+    
     try {
       const data = await tenantService.getTenants({
         search: searchTerm,
         planType: filterPlan,
         status: filterStatus,
       });
+      tenantsCache.set(cacheKey, data);
       setTenants(data);
     } catch (err) {
       console.error('Failed to load tenants:', err);
@@ -52,6 +62,12 @@ export function useTenants() {
   };
 
   useEffect(() => {
+    // If we have cache, we still revalidate in the background
+    const cacheKey = getCacheKey();
+    if (tenantsCache.has(cacheKey)) {
+      setTenants(tenantsCache.get(cacheKey));
+      setLoading(false);
+    }
     loadTenants();
   }, [searchTerm, filterPlan, filterStatus]);
 

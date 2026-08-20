@@ -6,15 +6,20 @@ import {
   buildUpdateUserRequestBody,
 } from '../types/userTypes';
 
+const usersCache = new Map();
+
 export function useUsers() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   // Search & Filter state
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
   const [filterRole, setFilterRole] = useState(searchParams.get('role') || 'all');
   const [filterStatus, setFilterStatus] = useState(searchParams.get('status') || 'all');
+
+  const getCacheKey = () => `${searchTerm}-${filterRole}-${filterStatus}`;
+  
+  const [users, setUsers] = useState(usersCache.get(getCacheKey()) || []);
+  const [loading, setLoading] = useState(!usersCache.has(getCacheKey()));
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,13 +40,18 @@ export function useUsers() {
   }, [searchParams]);
 
   const loadUsers = async () => {
-    setLoading(true);
+    const cacheKey = getCacheKey();
+    if (!usersCache.has(cacheKey)) {
+      setLoading(true);
+    }
+    
     try {
       const data = await userService.getUsers({
         search: searchTerm,
         role: filterRole,
         status: filterStatus,
       });
+      usersCache.set(cacheKey, data);
       setUsers(data);
     } catch (err) {
       console.error('Failed to load users:', err);
@@ -51,6 +61,12 @@ export function useUsers() {
   };
 
   useEffect(() => {
+    // Revalidate background data
+    const cacheKey = getCacheKey();
+    if (usersCache.has(cacheKey)) {
+      setUsers(usersCache.get(cacheKey));
+      setLoading(false);
+    }
     loadUsers();
   }, [searchTerm, filterRole, filterStatus]);
 

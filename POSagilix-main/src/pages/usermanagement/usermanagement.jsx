@@ -11,7 +11,6 @@ function AddUserModal({ onClose, onSubmit }) {
     email: '',
     password: '',
     role: 'Tenant Admin',
-    tenant: 'Warung Kopi Nusantara',
     status: 'Active',
   });
 
@@ -96,16 +95,6 @@ function AddUserModal({ onClose, onSubmit }) {
               </select>
             </div>
           </div>
-          <div className="form-group">
-            <label className="form-label">Assigned Tenant</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="e.g. Warung Kopi Nusantara"
-              value={form.tenant}
-              onChange={(e) => setForm((p) => ({ ...p, tenant: e.target.value }))}
-            />
-          </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancel
@@ -126,7 +115,6 @@ function EditUserModal({ user, onClose, onSubmit }) {
     name: user.name,
     email: user.email,
     role: user.role,
-    tenant: user.tenant,
     status: user.status,
   });
 
@@ -189,15 +177,6 @@ function EditUserModal({ user, onClose, onSubmit }) {
                 <option value="Inactive">Inactive</option>
               </select>
             </div>
-          </div>
-          <div className="form-group">
-            <label className="form-label">Assigned Tenant</label>
-            <input
-              type="text"
-              className="form-control"
-              value={form.tenant}
-              onChange={(e) => setForm((p) => ({ ...p, tenant: e.target.value }))}
-            />
           </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>
@@ -265,7 +244,6 @@ function UserManagement() {
               <tr>
                 <th>USER NAME</th>
                 <th>ROLE</th>
-                <th>ASSIGNED TENANT</th>
                 <th>STATUS</th>
                 <th>LAST LOGIN</th>
                 <th className="text-right">ACTIONS</th>
@@ -275,14 +253,14 @@ function UserManagement() {
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={`skeleton-${i}`}>
-                    <td colSpan={6} style={{ padding: '8px 16px' }}>
+                    <td colSpan={5} style={{ padding: '8px 16px' }}>
                       <div className="skeleton skeleton-table-row"></div>
                     </td>
                   </tr>
                 ))
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="table-empty">
+                  <td colSpan={5} className="table-empty">
                     No users found matching your criteria.
                   </td>
                 </tr>
@@ -297,9 +275,6 @@ function UserManagement() {
                     </td>
                     <td>
                       <span className="role-badge">{user.role}</span>
-                    </td>
-                    <td>
-                      <span className="tenant-text">Global</span>
                     </td>
                     <td>
                       <span className={`badge ${getStatusBadgeClass(user.isActive ? 'Active' : 'Inactive')}`}>
