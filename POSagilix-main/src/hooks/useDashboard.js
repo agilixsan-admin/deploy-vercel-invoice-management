@@ -15,7 +15,13 @@ export function useDashboard() {
     setLoading(true);
     try {
       const summary = await dashboardService.getDashboardSummary();
-      setData(summary);
+      setData({
+        totalTenants: summary.totalTenants || 0,
+        activeSubscriptions: summary.activeTenants || 0,
+        pastDueCount: summary.overdueInvoices || 0,
+        growthData: summary.growthData || [],
+        pastDueClients: summary.pastDueClients || [],
+      });
     } catch (err) {
       console.error('Failed to load dashboard summary:', err);
     } finally {
