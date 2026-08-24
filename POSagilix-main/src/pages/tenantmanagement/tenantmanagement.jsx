@@ -320,6 +320,8 @@ function TenantManagement() {
   } = useTenants();
 
   const [isDeleting, setIsDeleting] = useState(false);
+  const [lockingTenant, setLockingTenant] = useState(null);
+  const [isLocking, setIsLocking] = useState(false);
 
   const onDeleteConfirm = async () => {
     setIsDeleting(true);
@@ -329,6 +331,18 @@ function TenantManagement() {
       // error handled
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const onLockConfirm = async () => {
+    setIsLocking(true);
+    try {
+      await handleToggleLock(lockingTenant.id, lockingTenant.status === 'LOCKED');
+      setLockingTenant(null);
+    } catch (err) {
+      // error handled
+    } finally {
+      setIsLocking(false);
     }
   };
 
@@ -413,7 +427,7 @@ function TenantManagement() {
                         <button
                           className="action-btn"
                           title="Lock / Unlock Account"
-                          onClick={() => handleToggleLock(tenant.id, tenant.status === 'LOCKED')}
+                          onClick={() => setLockingTenant(tenant)}
                         >
                           {tenant.status === 'LOCKED' ? <Unlock size={14} /> : <Lock size={14} />}
                         </button>
@@ -486,7 +500,7 @@ function TenantManagement() {
           onSubmit={handleEditTenant}
         />
       )}
-
+      {/* Delete Confirmation Modal */}
       {deletingTenantId && (
         <div className="modal-overlay" onClick={() => setDeletingTenantId(null)}>
           <div className="modal modal-sm">
@@ -496,19 +510,58 @@ function TenantManagement() {
                 <X size={18} />
               </button>
             </div>
-            <p className="modal-body-text">
-              Are you sure you want to delete this tenant account? This action cannot be undone.
-            </p>
-            <div className="modal-footer">
+            <div className="modal-body" style={{ padding: '24px 0', textAlign: 'center' }}>
+              <p>Are you sure you want to delete this tenant?</p>
+              <p style={{ fontSize: '13px', color: '#64748b', marginTop: '8px' }}>This action cannot be undone.</p>
+            </div>
+            <div className="modal-footer" style={{ borderTop: 'none', paddingTop: 0 }}>
               <button className="btn btn-secondary" onClick={() => setDeletingTenantId(null)}>
                 Cancel
               </button>
-              <button
-                className="btn btn-danger"
-                onClick={onDeleteConfirm}
-                disabled={isDeleting}
+              <button className="btn btn-danger" onClick={onDeleteConfirm} disabled={isDeleting}>
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lock/Unlock Confirmation Modal */}
+      {lockingTenant && (
+        <div className="modal-overlay" onClick={() => setLockingTenant(null)}>
+          <div className="modal modal-sm">
+            <div className="modal-header">
+              <h2 className="modal-title">
+                {lockingTenant.status === 'LOCKED' ? 'Unlock Account' : 'Lock Account'}
+              </h2>
+              <button className="modal-close" onClick={() => setLockingTenant(null)}>
+                <X size={18} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ padding: '24px 0', textAlign: 'center' }}>
+              <p>
+                {lockingTenant.status === 'LOCKED' 
+                  ? `Restore access for ${lockingTenant.businessName}?`
+                  : `Revoke access for ${lockingTenant.businessName}?`}
+              </p>
+              <p style={{ fontSize: '13px', color: '#64748b', marginTop: '8px' }}>
+                {lockingTenant.status === 'LOCKED'
+                  ? 'They will regain full access to their dashboard and services.'
+                  : 'Their access will be immediately blocked and active sessions will be terminated.'}
+              </p>
+            </div>
+            <div className="modal-footer" style={{ borderTop: 'none', paddingTop: 0 }}>
+              <button className="btn btn-secondary" onClick={() => setLockingTenant(null)}>
+                Cancel
+              </button>
+              <button 
+                className={`btn ${lockingTenant.status === 'LOCKED' ? 'btn-primary' : 'btn-danger'}`} 
+                onClick={onLockConfirm} 
+                disabled={isLocking}
               >
-                {isDeleting ? 'Deleting...' : 'Delete Tenant'}
+                {isLocking 
+                  ? 'Processing...' 
+                  : lockingTenant.status === 'LOCKED' ? 'Unlock Account' : 'Lock Account'}
               </button>
             </div>
           </div>
