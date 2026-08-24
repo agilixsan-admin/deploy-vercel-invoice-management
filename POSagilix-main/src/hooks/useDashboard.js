@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { dashboardService } from '../services/dashboardService';
 import { invoiceService } from '../services/invoiceService';
+import { tenantService } from '../services/tenantService';
 
 // Global cache outside the hook
 let dashboardCache = null;
@@ -22,15 +23,16 @@ export function useDashboard() {
       setLoading(true);
     }
     try {
-      const [summary, growth, unpaidInvoices] = await Promise.all([
-        dashboardService.getDashboardSummary(),
-        dashboardService.getTenantGrowth(),
-        invoiceService.getInvoices({ status: 'Unpaid' })
+      const [allTenantsMeta, activeTenantsMeta, unpaidInvoices, growth] = await Promise.all([
+        tenantService.getTenants({ limit: 1, returnMeta: true }),
+        tenantService.getTenants({ status: 'ACTIVE', limit: 1, returnMeta: true }),
+        invoiceService.getInvoices({ status: 'Unpaid', limit: 100 }),
+        dashboardService.getTenantGrowth()
       ]);
       const newData = {
-        totalTenants: summary.totalTenants || 0,
-        activeSubscriptions: summary.activeTenants || 0,
-        pastDueCount: summary.overdueInvoices || 0,
+        totalTenants: allTenantsMeta.total || 0,
+        activeSubscriptions: activeTenantsMeta.total || 0,
+        pastDueCount: unpaidInvoices ? unpaidInvoices.length : 0,
         growthData: (growth || []).map(g => ({ month: g.month, tenants: g.count })),
         pastDueClients: (unpaidInvoices || []).slice(0, 5).map(inv => ({
           id: inv.id,

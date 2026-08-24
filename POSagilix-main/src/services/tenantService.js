@@ -9,6 +9,9 @@ export const tenantService = {
     const query = buildTenantFilterQueryParams(params);
     const response = await apiClient.get('/tenants', { params: query });
     const payload = response.data.data || response.data;
+    
+    if (params.returnMeta) return payload;
+    
     // Handle both PaginatedResult { items: [] } and flat arrays
     return payload.items || payload;
   },
