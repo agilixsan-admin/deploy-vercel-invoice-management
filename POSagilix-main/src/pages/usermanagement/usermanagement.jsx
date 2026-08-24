@@ -167,13 +167,13 @@ function EditUserModal({ user, onClose, onSubmit }) {
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Email Address</label>
+            <label className="form-label">Email Address (Read Only)</label>
             <input
               type="email"
               className="form-control"
               value={form.email}
-              onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-              required
+              disabled
+              title="Email address cannot be changed"
             />
           </div>
           <div className="select-row">
@@ -190,11 +190,12 @@ function EditUserModal({ user, onClose, onSubmit }) {
               </select>
             </div>
             <div className="form-group">
-              <label className="form-label">Status</label>
+              <label className="form-label">Status (Read Only)</label>
               <select
                 className="form-control form-select"
                 value={form.status}
-                onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
+                disabled
+                title="Status must be changed via Lock/Unlock actions"
               >
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
