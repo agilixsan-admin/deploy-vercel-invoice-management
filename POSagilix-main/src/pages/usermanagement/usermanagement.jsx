@@ -436,6 +436,7 @@ function UserManagement() {
         }
         primaryButtonText="Close"
         onPrimaryClick={() => setSuccessModalData(null)}
+        secondaryButtonText={null}
       />
     </div>
   );
