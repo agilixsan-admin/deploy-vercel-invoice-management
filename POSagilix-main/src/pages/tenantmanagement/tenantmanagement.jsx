@@ -27,7 +27,11 @@ function AddTenantModal({ onClose, onSubmit }) {
     try {
       await onSubmit(form);
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'An error occurred while creating the tenant.');
+      let errorMsg = err.response?.data?.message || err.message || 'An error occurred while creating the tenant.';
+      if (errorMsg.toLowerCase().includes('expirydate must be a future date')) {
+        errorMsg = 'Expiry Date Must Be a Future Date';
+      }
+      setError(errorMsg);
       setIsSubmitting(false);
     }
   };
@@ -104,6 +108,7 @@ function AddTenantModal({ onClose, onSubmit }) {
             <input
               type="date"
               className="form-control"
+              min={new Date().toISOString().split('T')[0]}
               value={form.expiryDate}
               onChange={(e) => setForm({ ...form, expiryDate: e.target.value })}
             />
@@ -142,7 +147,11 @@ function EditTenantModal({ tenant, onClose, onSubmit }) {
     try {
       await onSubmit(tenant.id, form);
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'An error occurred while updating the tenant.');
+      let errorMsg = err.response?.data?.message || err.message || 'An error occurred while updating the tenant.';
+      if (errorMsg.toLowerCase().includes('expirydate must be a future date')) {
+        errorMsg = 'Expiry Date Must Be a Future Date';
+      }
+      setError(errorMsg);
       setIsSubmitting(false);
     }
   };
@@ -216,6 +225,7 @@ function EditTenantModal({ tenant, onClose, onSubmit }) {
             <input
               type="date"
               className="form-control"
+              min={new Date().toISOString().split('T')[0]}
               value={form.expiryDate}
               onChange={(e) => setForm({ ...form, expiryDate: e.target.value })}
             />
