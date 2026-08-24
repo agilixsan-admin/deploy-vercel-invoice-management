@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { invoiceService } from '../services/invoiceService';
+import { clearDashboardCache } from './useDashboard';
 import { buildCreateInvoiceRequestBody } from '../types/invoiceTypes';
 
 const invoicesCache = new Map();
@@ -109,12 +110,14 @@ export function useInvoices(invoiceId = null) {
       ...createdInvoice,
       tenantName: tenantName || createdInvoice.tenant?.businessName
     });
+    clearDashboardCache();
     await loadInvoices();
   };
 
   const handleUpdateStatus = async (id, status) => {
     await invoiceService.updateInvoiceStatus(id, status);
     showToast(`Invoice ${id} marked as ${status}.`);
+    clearDashboardCache();
     await loadInvoices();
   };
 

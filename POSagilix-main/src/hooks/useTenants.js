@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { tenantService } from '../services/tenantService';
+import { clearDashboardCache } from './useDashboard';
 import {
   buildCreateTenantRequestBody,
   buildUpdateTenantRequestBody,
@@ -109,6 +110,7 @@ export function useTenants() {
     const createdTenant = await tenantService.createTenant(payload);
     setShowAddModal(false);
     setSuccessModalData(createdTenant);
+    clearDashboardCache();
     await loadTenants();
   };
 
@@ -123,17 +125,20 @@ export function useTenants() {
     });
     await tenantService.updateTenant(id, payload);
     setEditingTenant(null);
+    clearDashboardCache();
     await loadTenants();
   };
 
   const handleToggleLock = async (id, isLocked) => {
     await tenantService.toggleLockTenant(id, isLocked);
+    clearDashboardCache();
     await loadTenants();
   };
 
   const handleDeleteTenant = async (id) => {
     await tenantService.deleteTenant(id);
     setDeletingTenantId(null);
+    clearDashboardCache();
     await loadTenants();
   };
 

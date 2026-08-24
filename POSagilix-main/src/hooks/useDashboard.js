@@ -6,6 +6,10 @@ import { tenantService } from '../services/tenantService';
 // Global cache outside the hook
 let dashboardCache = null;
 
+export const clearDashboardCache = () => {
+  dashboardCache = null;
+};
+
 export function useDashboard() {
   const [data, setData] = useState(
     dashboardCache || {
