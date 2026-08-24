@@ -1274,3 +1274,20 @@
   width: 120px;
   border-radius: 8px;
 }
+
+.password-toggle-btn {
+  position: absolute;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.3s ease;
+}
+
+.password-toggle-btn:hover {
+  color: #f8fafc;
+}

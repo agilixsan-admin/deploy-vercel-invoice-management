@@ -15,16 +15,18 @@ function AddTenantModal({ onClose, onSubmit }) {
     outlets: 1,
     expiryDate: new Date().toISOString().split('T')[0], // e.g. 2025-11-30
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.businessName || !form.ownerEmail) return;
     
     setIsSubmitting(true);
+    setError(null);
     try {
       await onSubmit(form);
     } catch (err) {
+      setError(err.response?.data?.message || err.message || 'An error occurred while creating the tenant.');
       setIsSubmitting(false);
     }
   };
@@ -39,6 +41,7 @@ function AddTenantModal({ onClose, onSubmit }) {
           </button>
         </div>
         <form onSubmit={handleSubmit}>
+          {error && <div className="modal-error-alert">{error}</div>}
           <div className="form-group">
             <label className="form-label">Business Name <span className="required">*</span></label>
             <input
@@ -129,13 +132,16 @@ function EditTenantModal({ tenant, onClose, onSubmit }) {
     expiryDate: tenant.expiryDate,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
     try {
       await onSubmit(tenant.id, form);
     } catch (err) {
+      setError(err.response?.data?.message || err.message || 'An error occurred while updating the tenant.');
       setIsSubmitting(false);
     }
   };
@@ -150,6 +156,7 @@ function EditTenantModal({ tenant, onClose, onSubmit }) {
           </button>
         </div>
         <form onSubmit={handleSubmit}>
+          {error && <div className="modal-error-alert">{error}</div>}
           <div className="form-group">
             <label className="form-label">Business Name</label>
             <input
