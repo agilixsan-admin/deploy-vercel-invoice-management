@@ -20,6 +20,19 @@ const navItems = [
 ];
 
 function Sidebar({ isOpen, onClose }) {
+  const userInfoStr = localStorage.getItem('user_info');
+  let userInfo = null;
+  try {
+    userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
+  } catch(e) {}
+  
+  const userName = userInfo?.fullName || userInfo?.name || 'Jamal';
+  const userRole = userInfo?.role === 'SUPER_ADMIN' ? 'Super Admin' : 
+                   userInfo?.role === 'TENANT_ADMIN' ? 'Tenant Admin' : 
+                   userInfo?.role === 'CASHIER' ? 'Cashier' : 
+                   userInfo?.role || 'Super Admin';
+  const userInitials = userName.substring(0, 2).toUpperCase();
+
   const handleNavClick = () => {
     if (window.innerWidth <= 1024) {
       onClose();
@@ -81,10 +94,10 @@ function Sidebar({ isOpen, onClose }) {
 
       <div className="sidebar-footer">
         <div className="sidebar-user">
-          <div className="sidebar-user-avatar">AD</div>
+          <div className="sidebar-user-avatar">{userInitials}</div>
           <div className="sidebar-user-info">
-            <span className="sidebar-user-name">Admin User</span>
-            <span className="sidebar-user-role">Super Admin</span>
+            <span className="sidebar-user-name">{userName}</span>
+            <span className="sidebar-user-role">{userRole}</span>
           </div>
         </div>
       </div>

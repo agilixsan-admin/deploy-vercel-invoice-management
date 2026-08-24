@@ -126,10 +126,12 @@ function AddUserModal({ onClose, onSubmit }) {
 // Edit User Modal
 function EditUserModal({ user, onClose, onSubmit }) {
   const [form, setForm] = useState({
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    status: user.status,
+    name: user.fullName || user.name || '',
+    email: user.email || '',
+    role: user.role === 'SUPER_ADMIN' ? 'Super Admin' : 
+          user.role === 'TENANT_ADMIN' ? 'Tenant Admin' : 
+          user.role === 'CASHIER' ? 'Cashier' : user.role || '',
+    status: user.isActive ? 'Active' : 'Inactive',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);

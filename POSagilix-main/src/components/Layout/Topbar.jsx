@@ -45,18 +45,33 @@ const searchDatabase = {
   ]
 };
 
-function Topbar({ onToggleSidebar, isSidebarOpen }) {
+export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const searchRef = useRef(null);
+  const notifRef = useRef(null);
+  const profileRef = useRef(null);
+  const inputRef = useRef(null);
+
+  const userInfoStr = localStorage.getItem('user_info');
+  let userInfo = null;
+  try {
+    userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
+  } catch(e) {}
+  
+  const userName = userInfo?.fullName || userInfo?.name || 'Jamal';
+  const userRole = userInfo?.role === 'SUPER_ADMIN' ? 'Super Admin' : 
+                   userInfo?.role === 'TENANT_ADMIN' ? 'Tenant Admin' : 
+                   userInfo?.role === 'CASHIER' ? 'Cashier' : 
+                   userInfo?.role || 'Super Admin';
+  const userInitials = userName.substring(0, 2).toUpperCase();
+
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [unpaidCount, setUnpaidCount] = useState(0);
   const [unpaidTenants, setUnpaidTenants] = useState([]);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const searchRef = useRef(null);
-  const inputRef = useRef(null);
-  const notifRef = useRef(null);
-  const profileRef = useRef(null);
-  const navigate = useNavigate();
 
   // Load unpaid tenants
   useEffect(() => {
@@ -348,13 +363,13 @@ function Topbar({ onToggleSidebar, isSidebarOpen }) {
           )}
         </div>
         <div className="profile-wrapper" ref={profileRef}>
-          <div className="topbar-avatar" onClick={() => setIsProfileOpen(!isProfileOpen)}>A</div>
+          <div className="topbar-avatar" onClick={() => setIsProfileOpen(!isProfileOpen)}>{userInitials}</div>
           
           {isProfileOpen && (
             <div className="profile-dropdown">
               <div className="profile-header">
-                <div className="profile-name">Admin User</div>
-                <div className="profile-role">Super Admin</div>
+                <div className="profile-name">{userName}</div>
+                <div className="profile-role">{userRole}</div>
               </div>
               <div className="profile-menu">
                 <button className="profile-menu-item" onClick={() => {

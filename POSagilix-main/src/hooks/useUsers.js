@@ -111,7 +111,14 @@ export function useUsers() {
   };
 
   const handleEditUser = async (id, formData) => {
-    const payload = buildUpdateUserRequestBody(id, formData);
+    const payload = buildUpdateUserRequestBody(id, {
+      fullName: formData.name,
+      email: formData.email,
+      role: formData.role === 'Super Admin' ? 'SUPER_ADMIN' :
+            formData.role === 'Tenant Admin' ? 'TENANT_ADMIN' :
+            formData.role === 'Cashier' ? 'CASHIER' : undefined,
+      isActive: formData.status === 'Active',
+    });
     await userService.updateUser(id, payload);
     setEditingUser(null);
     await loadUsers();
