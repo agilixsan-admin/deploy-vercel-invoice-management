@@ -122,6 +122,8 @@ export function useTenants() {
       planType: formData.planType,
       outlets: parseInt(formData.outlets, 10) || 1,
       expiryDate: formData.expiryDate,
+      webhookUrl: formData.webhookUrl || null,
+      apiKey: formData.apiKey || null,
     });
     await tenantService.updateTenant(id, payload);
     setEditingTenant(null);

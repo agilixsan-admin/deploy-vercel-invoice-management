@@ -10,6 +10,8 @@ export function buildCreateTenantRequestBody(formData) {
     planType: formData.planType?.toUpperCase() || 'YEARLY',
     outletCount: parseInt(formData.outlets, 10) || 1,
     expiryDate: formData.expiryDate || new Date().toISOString().split('T')[0],
+    webhookUrl: formData.webhookUrl?.trim() || null,
+    apiKey: formData.apiKey?.trim() || null,
   };
 }
 

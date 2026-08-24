@@ -14,6 +14,8 @@ function AddTenantModal({ onClose, onSubmit }) {
     planType: '',
     outlets: '',
     expiryDate: '',
+    webhookUrl: '',
+    apiKey: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -114,6 +116,26 @@ function AddTenantModal({ onClose, onSubmit }) {
               onChange={(e) => setForm({ ...form, expiryDate: e.target.value })}
             />
           </div>
+          <div className="form-group">
+            <label className="form-label">Webhook URL</label>
+            <input
+              type="url"
+              className="form-control"
+              placeholder="https://example.com/webhook"
+              value={form.webhookUrl}
+              onChange={(e) => setForm({ ...form, webhookUrl: e.target.value })}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">API Key</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Your API Key"
+              value={form.apiKey}
+              onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
+            />
+          </div>
           <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancel
@@ -137,6 +159,8 @@ function EditTenantModal({ tenant, onClose, onSubmit }) {
     planType: tenant.planType?.toLowerCase() || 'yearly',
     outlets: tenant.outletCount || tenant.outlets,
     expiryDate: tenant.expiryDate,
+    webhookUrl: tenant.webhookUrl || '',
+    apiKey: tenant.apiKey || '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -229,6 +253,26 @@ function EditTenantModal({ tenant, onClose, onSubmit }) {
               min={new Date().toISOString().split('T')[0]}
               value={form.expiryDate}
               onChange={(e) => setForm({ ...form, expiryDate: e.target.value })}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Webhook URL</label>
+            <input
+              type="url"
+              className="form-control"
+              placeholder="https://example.com/webhook"
+              value={form.webhookUrl}
+              onChange={(e) => setForm({ ...form, webhookUrl: e.target.value })}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">API Key</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Your API Key"
+              value={form.apiKey}
+              onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
             />
           </div>
           <div className="modal-footer">
