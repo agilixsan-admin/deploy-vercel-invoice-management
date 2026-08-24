@@ -388,7 +388,3 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
     </header>
   );
 }
-
-export default Topbar;
-
-
