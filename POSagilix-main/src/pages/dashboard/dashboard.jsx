@@ -5,7 +5,9 @@ import {
   Download, Plus, TrendingUp, Users, CheckCircle, AlertTriangle,
   MoreHorizontal, Send
 } from 'lucide-react';
+import { useState } from 'react';
 import { useDashboard } from '../../hooks/useDashboard';
+import { invoiceService } from '../../services/invoiceService';
 import '../style.css';
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -29,6 +31,20 @@ function Dashboard() {
     pastDueClients,
     loading,
   } = useDashboard();
+  
+  const [remindingId, setRemindingId] = useState(null);
+
+  const handleSendReminder = async (id) => {
+    setRemindingId(id);
+    try {
+      await invoiceService.sendReminder(id);
+      alert('Reminder sent successfully!');
+    } catch (err) {
+      alert('Failed to send reminder.');
+    } finally {
+      setRemindingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -178,7 +194,7 @@ function Dashboard() {
           </div>
           <div className="attention-list">
             {pastDueClients.map((client) => (
-              <div key={client.name} className="attention-item">
+              <div key={client.id} className="attention-item">
                 <div className="attention-item-info">
                   <span className="attention-item-name">{client.name}</span>
                   <div className="attention-item-status">
@@ -186,9 +202,13 @@ function Dashboard() {
                     <span className="attention-item-date">{client.dueDate}</span>
                   </div>
                 </div>
-                <button className="btn btn-danger btn-sm reminder-btn">
+                <button 
+                  className="btn btn-danger btn-sm reminder-btn"
+                  onClick={() => handleSendReminder(client.id)}
+                  disabled={remindingId === client.id}
+                >
                   <Send size={11} />
-                  Reminder
+                  {remindingId === client.id ? '...' : 'Reminder'}
                 </button>
               </div>
             ))}
