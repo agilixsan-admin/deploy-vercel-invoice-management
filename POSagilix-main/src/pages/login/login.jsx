@@ -20,14 +20,28 @@ const Login = () => {
       
       if (response.data && response.data.accessToken) {
         localStorage.setItem('access_token', response.data.accessToken);
-        if (response.data.user) {
-          localStorage.setItem('user_info', JSON.stringify(response.data.user));
-        }
+        
+        // Store user info if provided, else create a mock user based on email (for Mock API)
+        const userObj = response.data.user || {
+          fullName: email.split('@')[0],
+          email: email,
+          role: 'SUPER_ADMIN'
+        };
+        localStorage.setItem('user_info', JSON.stringify(userObj));
         navigate('/dashboard');
+        
       } else if (response.data && response.data.data?.accessToken) {
         // Fallback for nested data pattern
         localStorage.setItem('access_token', response.data.data.accessToken);
+        
+        const userObj = response.data.data.user || {
+          fullName: email.split('@')[0],
+          email: email,
+          role: 'SUPER_ADMIN'
+        };
+        localStorage.setItem('user_info', JSON.stringify(userObj));
         navigate('/dashboard');
+        
       } else {
          alert('Login failed. No token received.');
       }

@@ -26,7 +26,7 @@ function Sidebar({ isOpen, onClose }) {
     userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
   } catch(e) {}
   
-  const userName = userInfo?.fullName || userInfo?.name || 'Jamal';
+  const userName = userInfo?.fullName || userInfo?.name || 'Admin User';
   const userRole = userInfo?.role === 'SUPER_ADMIN' ? 'Super Admin' : 
                    userInfo?.role === 'TENANT_ADMIN' ? 'Tenant Admin' : 
                    userInfo?.role === 'CASHIER' ? 'Cashier' : 
