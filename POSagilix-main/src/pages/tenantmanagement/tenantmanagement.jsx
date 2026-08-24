@@ -15,6 +15,7 @@ function AddTenantModal({ onClose, onSubmit }) {
     outlets: 1,
     expiryDate: new Date().toISOString().split('T')[0], // e.g. 2025-11-30
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
   const handleSubmit = async (e) => {
