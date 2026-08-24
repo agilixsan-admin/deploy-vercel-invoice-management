@@ -42,13 +42,15 @@ function CreateInvoiceModal({ onClose, onSubmit }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && !isSubmitting && onClose()}>
       <div className="modal">
         <div className="modal-header">
           <h2 className="modal-title">Create New Invoice</h2>
-          <button className="modal-close" onClick={onClose} type="button">
-            <X size={18} />
-          </button>
+          {!isSubmitting && (
+            <button className="modal-close" onClick={onClose} type="button">
+              <X size={18} />
+            </button>
+          )}
         </div>
         <form onSubmit={handleSubmit}>
           {error && <div className="modal-error">{error}</div>}
@@ -109,7 +111,7 @@ function CreateInvoiceModal({ onClose, onSubmit }) {
             />
           </div>
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
+            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={isSubmitting}>

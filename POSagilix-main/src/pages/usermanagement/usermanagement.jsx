@@ -29,13 +29,15 @@ function AddUserModal({ onClose, onSubmit }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && !isSubmitting && onClose()}>
       <div className="modal">
         <div className="modal-header">
           <h2 className="modal-title">Add New User</h2>
-          <button className="modal-close" onClick={onClose} type="button">
-            <X size={18} />
-          </button>
+          {!isSubmitting && (
+            <button className="modal-close" onClick={onClose} type="button">
+              <X size={18} />
+            </button>
+          )}
         </div>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -110,7 +112,7 @@ function AddUserModal({ onClose, onSubmit }) {
             </div>
           </div>
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
+            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
@@ -147,13 +149,15 @@ function EditUserModal({ user, onClose, onSubmit }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && !isSubmitting && onClose()}>
       <div className="modal">
         <div className="modal-header">
           <h2 className="modal-title">Edit User</h2>
-          <button className="modal-close" onClick={onClose} type="button">
-            <X size={18} />
-          </button>
+          {!isSubmitting && (
+            <button className="modal-close" onClick={onClose} type="button">
+              <X size={18} />
+            </button>
+          )}
         </div>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -203,7 +207,7 @@ function EditUserModal({ user, onClose, onSubmit }) {
             </div>
           </div>
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
+            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
@@ -400,20 +404,22 @@ function UserManagement() {
 
       {/* Delete Confirmation Modal */}
       {deletingUserId && (
-        <div className="modal-overlay" onClick={() => setDeletingUserId(null)}>
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && !isDeleting && setDeletingUserId(null)}>
           <div className="modal modal-sm">
             <div className="modal-header">
               <h2 className="modal-title">Confirm Delete</h2>
-              <button className="modal-close" onClick={() => setDeletingUserId(null)}>
-                <X size={18} />
-              </button>
+              {!isDeleting && (
+                <button className="modal-close" onClick={() => setDeletingUserId(null)}>
+                  <X size={18} />
+                </button>
+              )}
             </div>
             <div className="modal-body" style={{ padding: '24px 0', textAlign: 'center' }}>
               <p>Are you sure you want to delete this user?</p>
               <p style={{ fontSize: '13px', color: '#64748b', marginTop: '8px' }}>This action cannot be undone.</p>
             </div>
             <div className="modal-footer" style={{ borderTop: 'none', paddingTop: 0 }}>
-              <button className="btn btn-secondary" onClick={() => setDeletingUserId(null)}>
+              <button className="btn btn-secondary" onClick={() => setDeletingUserId(null)} disabled={isDeleting}>
                 Cancel
               </button>
               <button className="btn btn-danger" onClick={onDeleteConfirm} disabled={isDeleting}>
