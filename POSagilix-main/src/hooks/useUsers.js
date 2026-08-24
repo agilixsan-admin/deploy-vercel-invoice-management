@@ -27,6 +27,7 @@ export function useUsers() {
 
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
+  const [successModalData, setSuccessModalData] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
   const [deletingUserId, setDeletingUserId] = useState(null);
 
@@ -103,8 +104,9 @@ export function useUsers() {
   // CRUD Actions
   const handleAddUser = async (formData) => {
     const payload = buildCreateUserRequestBody(formData);
-    await userService.createUser(payload);
+    const createdUser = await userService.createUser(payload);
     setShowAddModal(false);
+    setSuccessModalData(createdUser);
     await loadUsers();
   };
 
@@ -139,6 +141,8 @@ export function useUsers() {
     totalPages,
     itemsPerPage,
     showAddModal,
+    successModalData,
+    setSuccessModalData,
     editingUser,
     deletingUserId,
     setSearchTerm: handleSearchChange,

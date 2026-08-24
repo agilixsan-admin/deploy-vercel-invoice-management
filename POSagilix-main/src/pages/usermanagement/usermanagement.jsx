@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Pencil, Trash2, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useUsers } from '../../hooks/useUsers';
 import { getStatusBadgeClass } from '../../lib/formatters';
+import SuccessModal from '../../components/Modal/SuccessModal';
 import '../style.css';
 
 // Add User Modal
@@ -101,6 +102,7 @@ function AddUserModal({ onClose, onSubmit }) {
                 value={form.status}
                 onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
                 disabled
+                style={{ appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none', backgroundImage: 'none' }}
               >
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
@@ -223,6 +225,8 @@ function UserManagement() {
     totalPages,
     itemsPerPage,
     showAddModal,
+    successModalData,
+    setSuccessModalData,
     editingUser,
     deletingUserId,
     setSearchTerm,
@@ -274,7 +278,8 @@ function UserManagement() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>USER NAME</th>
+                <th>FULL NAME</th>
+                <th>EMAIL</th>
                 <th>ROLE</th>
                 <th>STATUS</th>
                 <th>LAST LOGIN</th>
@@ -285,14 +290,14 @@ function UserManagement() {
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={`skeleton-${i}`}>
-                    <td colSpan={5} style={{ padding: '8px 16px' }}>
+                    <td colSpan={6} style={{ padding: '8px 16px' }}>
                       <div className="skeleton skeleton-table-row"></div>
                     </td>
                   </tr>
                 ))
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="table-empty">
+                  <td colSpan={6} className="table-empty">
                     No users found matching your criteria.
                   </td>
                 </tr>
@@ -300,10 +305,10 @@ function UserManagement() {
                 users.map((user) => (
                   <tr key={user.id}>
                     <td>
-                      <div className="user-cell-info">
-                        <span className="user-name">{user.fullName}</span>
-                        <span className="user-email">{user.email}</span>
-                      </div>
+                      <span className="user-name">{user.fullName}</span>
+                    </td>
+                    <td>
+                      <span className="user-email">{user.email}</span>
                     </td>
                     <td>
                       <span className="role-badge">{user.role}</span>
@@ -400,24 +405,35 @@ function UserManagement() {
                 <X size={18} />
               </button>
             </div>
-            <p className="modal-body-text">
-              Are you sure you want to delete this user account? This action cannot be undone.
-            </p>
-            <div className="modal-footer">
+            <div className="modal-body" style={{ padding: '24px 0', textAlign: 'center' }}>
+              <p>Are you sure you want to delete this user?</p>
+              <p style={{ fontSize: '13px', color: '#64748b', marginTop: '8px' }}>This action cannot be undone.</p>
+            </div>
+            <div className="modal-footer" style={{ borderTop: 'none', paddingTop: 0 }}>
               <button className="btn btn-secondary" onClick={() => setDeletingUserId(null)}>
                 Cancel
               </button>
-              <button
-                className="btn btn-danger"
-                onClick={onDeleteConfirm}
-                disabled={isDeleting}
-              >
-                {isDeleting ? 'Deleting...' : 'Delete User'}
+              <button className="btn btn-danger" onClick={onDeleteConfirm} disabled={isDeleting}>
+                {isDeleting ? 'Deleting...' : 'Delete'}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Success Modal */}
+      <SuccessModal
+        isOpen={!!successModalData}
+        onClose={() => setSuccessModalData(null)}
+        title="User Created Successfully"
+        message={
+          <>
+            User <strong>{successModalData?.fullName || successModalData?.name}</strong> has been created and added to the system.
+          </>
+        }
+        primaryButtonText="Close"
+        onPrimaryClick={() => setSuccessModalData(null)}
+      />
     </div>
   );
 }
