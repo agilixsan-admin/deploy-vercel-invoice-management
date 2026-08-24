@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
-import pkg from '../../../package.json';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -123,7 +122,7 @@ const Login = () => {
       </div>
       
       <div style={{ position: 'absolute', bottom: '20px', color: 'rgba(255,255,255,0.7)', fontSize: '12px', fontWeight: '500' }}>
-        Agilix Console v{pkg.version}
+        Agilix Console v{__APP_VERSION__}
       </div>
     </div>
   );
