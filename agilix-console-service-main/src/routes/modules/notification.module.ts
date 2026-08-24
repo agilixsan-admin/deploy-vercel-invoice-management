@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Notification } from '../../models/notification.model';
 import { NotificationRepository } from '../../repositories/modules/notification.repository';
 import { NotificationService } from '../../service/modules/notifications/notification.service';
+import { MailService } from '../../service/modules/notifications/mail.service';
 import { NotificationController } from '../../controllers/modules/notifications/notification.controller';
 import { AuditLogModule } from './audit-log.module';
 import { RealtimeModule } from './realtime.module';
@@ -14,7 +15,7 @@ import { RealtimeModule } from './realtime.module';
     RealtimeModule,
   ],
   controllers: [NotificationController],
-  providers: [NotificationRepository, NotificationService],
-  exports: [NotificationService, NotificationRepository],
+  providers: [NotificationRepository, NotificationService, MailService],
+  exports: [NotificationService, NotificationRepository, MailService],
 })
 export class NotificationModule {}

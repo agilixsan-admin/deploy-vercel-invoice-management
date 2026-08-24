@@ -3,8 +3,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 import { Invoice } from '../../../models/invoice.model';
 import { InvoiceRepository } from '../../../repositories/modules/invoice.repository';
 import { TenantRepository } from '../../../repositories/modules/tenant.repository';
@@ -16,11 +14,13 @@ import { AuditLogService } from '../audit-logs/audit-log.service';
 import { EventPublisherService } from '../../../events/event-publisher.service';
 import { AuditAction } from '../../../types/enums/audit-action.enum';
 import { InvoiceStatus } from '../../../types/enums/invoice-status.enum';
-import {
-  INVOICE_REMINDER_QUEUE,
-  INVOICE_REMINDER_JOB,
-  InvoiceReminderJobPayload,
-} from '../../../queues/jobs/invoice-reminder.job';
+import { InvoiceStatus } from '../../../types/enums/invoice-status.enum';
+import { NotificationService } from '../notifications/notification.service';
+import { MailService } from '../notifications/mail.service';
+import { EmailTemplateRepository } from '../../../repositories/modules/email-template.repository';
+import { InvoicePdfService } from './invoice-pdf.service';
+import { NotificationType } from '../../../types/enums/notification-type.enum';
+import { NotificationStatus } from '../../../types/enums/notification-status.enum';
 
 @Injectable()
 export class InvoiceService {
@@ -29,8 +29,10 @@ export class InvoiceService {
     private readonly tenantRepository: TenantRepository,
     private readonly auditLogService: AuditLogService,
     private readonly eventPublisher: EventPublisherService,
-    @InjectQueue(INVOICE_REMINDER_QUEUE)
-    private readonly reminderQueue: Queue,
+    private readonly notificationService: NotificationService,
+    private readonly mailService: MailService,
+    private readonly emailTemplateRepository: EmailTemplateRepository,
+    private readonly invoicePdfService: InvoicePdfService,
   ) {}
 
   async findAll(
@@ -191,31 +193,67 @@ export class InvoiceService {
       throw new NotFoundException(`Tenant for invoice "${id}" not found`);
     }
 
-    const payload: InvoiceReminderJobPayload = {
-      invoiceId: invoice.id,
-      tenantId: invoice.tenantId,
-      recipientEmail: tenant.ownerEmail,
-      ownerName: tenant.ownerName,
-      businessName: tenant.businessName,
+    const formattedDueDate = new Date(invoice.dueDate).toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+
+    const { subject, html } = await this.emailTemplateRepository.render(
+      'invoice-reminder',
+      {
+        ownerName: tenant.ownerName,
+        businessName: tenant.businessName,
+        invoiceNumber: invoice.invoiceNumber,
+        billingPeriod: invoice.billingPeriod,
+        dueDate: formattedDueDate,
+        amount: Number(invoice.amount).toLocaleString('id-ID'),
+      },
+    );
+
+    const pdfBuffer = await this.invoicePdfService.generate({
       invoiceNumber: invoice.invoiceNumber,
       billingPeriod: invoice.billingPeriod,
-      dueDate: new Date(invoice.dueDate).toLocaleDateString('id-ID', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      }),
+      dueDate: formattedDueDate,
       amount: Number(invoice.amount),
       status: invoice.status,
       notes: invoice.notes,
+      businessName: tenant.businessName,
+      ownerName: tenant.ownerName,
+      ownerEmail: tenant.ownerEmail,
+      ownerPhone: tenant.ownerPhone,
       planType: tenant.planType,
       outletCount: tenant.outletCount,
-      ownerPhone: tenant.ownerPhone,
       issuedAt: invoice.createdAt.toISOString(),
-    };
-
-    await this.reminderQueue.add(INVOICE_REMINDER_JOB, payload, {
-      attempts: 3,
-      backoff: { type: 'exponential', delay: 5000 },
     });
+
+    const notification = await this.notificationService.create({
+      tenantId: invoice.tenantId,
+      type: NotificationType.REMINDER_EMAIL,
+      recipient: tenant.ownerEmail,
+      subject,
+      content: html,
+      status: NotificationStatus.PENDING,
+    });
+
+    try {
+      await this.mailService.sendEmail({
+        to: tenant.ownerEmail,
+        subject,
+        html,
+        attachments: [
+          {
+            filename: `${invoice.invoiceNumber}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf',
+          },
+        ],
+      });
+      await this.notificationService.markSent(notification.id);
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : 'Unknown error';
+      await this.notificationService.markFailed(notification.id, reason);
+      throw new BadRequestException('Failed to send email: ' + reason);
+    }
   }
 }

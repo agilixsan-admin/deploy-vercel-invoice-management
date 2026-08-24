@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BullModule } from '@nestjs/bullmq';
 import { Invoice } from '../../models/invoice.model';
 import { Tenant } from '../../models/tenant.model';
 import { InvoiceRepository } from '../../repositories/modules/invoice.repository';
@@ -10,18 +9,17 @@ import { InvoiceSchedulerService } from '../../service/modules/invoices/invoice-
 import { InvoiceController } from '../../controllers/modules/invoices/invoice.controller';
 import { AuditLogModule } from './audit-log.module';
 import { RealtimeModule } from './realtime.module';
-import { INVOICE_REMINDER_QUEUE } from '../../queues/jobs/invoice-reminder.job';
-import { INVOICE_OVERDUE_QUEUE } from '../../queues/jobs/invoice-overdue.job';
+import { NotificationModule } from './notification.module';
+import { EmailTemplate } from '../../models/email-template.model';
+import { EmailTemplateRepository } from '../../repositories/modules/email-template.repository';
+import { InvoicePdfService } from '../../service/modules/invoices/invoice-pdf.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Invoice, Tenant]),
-    BullModule.registerQueue(
-      { name: INVOICE_REMINDER_QUEUE },
-      { name: INVOICE_OVERDUE_QUEUE },
-    ),
+    TypeOrmModule.forFeature([Invoice, Tenant, EmailTemplate]),
     AuditLogModule,
     RealtimeModule,
+    NotificationModule,
   ],
   controllers: [InvoiceController],
   providers: [
@@ -29,6 +27,8 @@ import { INVOICE_OVERDUE_QUEUE } from '../../queues/jobs/invoice-overdue.job';
     TenantRepository,
     InvoiceService,
     InvoiceSchedulerService,
+    EmailTemplateRepository,
+    InvoicePdfService,
   ],
   exports: [InvoiceService, InvoiceRepository],
 })

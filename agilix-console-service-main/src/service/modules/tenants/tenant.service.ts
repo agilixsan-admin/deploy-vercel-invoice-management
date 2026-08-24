@@ -4,8 +4,6 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 import { Tenant } from '../../../models/tenant.model';
 import { TenantRepository } from '../../../repositories/modules/tenant.repository';
 import { PaginatedResult } from '../../../types/response.types';
@@ -20,11 +18,7 @@ import { AuditAction } from '../../../types/enums/audit-action.enum';
 import { TenantStatus } from '../../../types/enums/tenant-status.enum';
 import { NotificationStatus } from '../../../types/enums/notification-status.enum';
 import { NotificationType } from '../../../types/enums/notification-type.enum';
-import {
-  EMAIL_NOTIFICATION_QUEUE,
-  EMAIL_NOTIFICATION_JOB,
-  EmailNotificationJobPayload,
-} from '../../../queues/jobs/email-notification.job';
+import { MailService } from '../notifications/mail.service';
 import {
   WebhookDispatcherService,
   WebhookTarget,
@@ -41,8 +35,7 @@ export class TenantService {
     private readonly notificationService: NotificationService,
     private readonly emailTemplateRepository: EmailTemplateRepository,
     private readonly webhookDispatcher: WebhookDispatcherService,
-    @InjectQueue(EMAIL_NOTIFICATION_QUEUE)
-    private readonly emailQueue: Queue,
+    private readonly mailService: MailService,
   ) {}
 
   async findAll(query: ListTenantsQueryDto): Promise<PaginatedResult<Tenant>> {
@@ -149,29 +142,26 @@ export class TenantService {
         status: NotificationStatus.PENDING,
       });
 
-      const payload: EmailNotificationJobPayload = {
-        notificationId: notification.id,
-        tenantId: tenant.id,
-        recipient: tenant.ownerEmail,
+      await this.mailService.sendEmail({
+        to: tenant.ownerEmail,
         subject,
-        content: html,
-      };
-
-      await this.emailQueue.add(EMAIL_NOTIFICATION_JOB, payload, {
-        attempts: 3,
-        backoff: { type: 'exponential', delay: 5000 },
+        html,
       });
 
+      await this.notificationService.markSent(notification.id);
+
       this.logger.log(
-        `Welcome email queued for tenant ${tenant.id} → ${tenant.ownerEmail}`,
+        `Welcome email successfully sent for tenant ${tenant.id} → ${tenant.ownerEmail}`,
       );
     } catch (error) {
-      // Jangan gagalkan proses create tenant hanya karena email gagal di-queue.
+      // Jangan gagalkan proses create tenant hanya karena email gagal dikirim.
       // Error di-log untuk observability.
       const reason = error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(
-        `Failed to queue welcome email for tenant ${tenant.id}: ${reason}`,
+        `Failed to send welcome email for tenant ${tenant.id}: ${reason}`,
       );
+      // Optional: you can mark the notification as failed if you saved the notification ID
+      // but in this case, the error catch applies to the whole block so notification might not be created.
     }
   }
 
