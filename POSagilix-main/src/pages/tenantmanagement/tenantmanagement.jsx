@@ -322,12 +322,12 @@ function TenantManagement() {
                 tenants.map((tenant) => (
                 <tr key={tenant.id} className={tenant.status === 'LOCKED' ? 'row-locked' : ''}>
                     <td>
-                      <div className="tenant-cell-info">
-                        <span className="tenant-business-name">
+                      <div className="tenant-cell-info" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <div className="tenant-name">
                           {tenant.businessName}
-                          {tenant.status === 'LOCKED' && <Lock size={12} className="inline-lock-icon" />}
-                        </span>
-                        <span className="tenant-owner-email">{tenant.ownerEmail}</span>
+                          {tenant.status === 'LOCKED' && <Lock size={12} className="inline-lock-icon" style={{ marginLeft: '6px' }} />}
+                        </div>
+                        <div className="tenant-email">{tenant.ownerEmail}</div>
                       </div>
                     </td>
                     <td>
