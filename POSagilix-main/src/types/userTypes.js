@@ -20,7 +20,6 @@ export function buildCreateUserRequestBody(formData) {
 
 export function buildUpdateUserRequestBody(id, updates) {
   return {
-    id,
     ...updates,
   };
 }

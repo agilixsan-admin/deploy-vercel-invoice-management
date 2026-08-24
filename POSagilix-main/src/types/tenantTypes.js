@@ -17,7 +17,6 @@ export function buildCreateTenantRequestBody(formData) {
 
 export function buildUpdateTenantRequestBody(id, updates) {
   return {
-    id,
     ...updates,
   };
 }
