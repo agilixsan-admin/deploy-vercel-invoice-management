@@ -11,9 +11,9 @@ function AddTenantModal({ onClose, onSubmit }) {
     businessName: '',
     ownerName: '',
     ownerEmail: '',
-    planType: 'yearly',
-    outlets: 1,
-    expiryDate: new Date().toISOString().split('T')[0], // e.g. 2025-11-30
+    planType: '',
+    outlets: '',
+    expiryDate: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -88,6 +88,7 @@ function AddTenantModal({ onClose, onSubmit }) {
                 value={form.planType}
                 onChange={(e) => setForm({ ...form, planType: e.target.value })}
               >
+                <option value="" disabled>Select Plan Type</option>
                 <option value="yearly">Yearly Plan</option>
                 <option value="monthly">Monthly Plan</option>
               </select>
