@@ -338,6 +338,10 @@ function TenantManagement() {
     setIsLocking(true);
     try {
       await handleToggleLock(lockingTenant.id, lockingTenant.status === 'LOCKED');
+      setSuccessModalData({
+        action: lockingTenant.status === 'LOCKED' ? 'Unlock' : 'Lock',
+        businessName: lockingTenant.businessName
+      });
       setLockingTenant(null);
     } catch (err) {
       // error handled
@@ -572,15 +576,28 @@ function TenantManagement() {
       <SuccessModal
         isOpen={!!successModalData}
         onClose={() => setSuccessModalData(null)}
-        title="Tenant Created Successfully"
-        message={
-          <>
-            Tenant <strong>{successModalData?.businessName}</strong> has been created and added to the system.
-          </>
+        title={
+          successModalData?.action === 'Lock' ? "Tenant Locked Successfully" :
+          successModalData?.action === 'Unlock' ? "Tenant Unlocked Successfully" :
+          "Tenant Created Successfully"
         }
-        primaryButtonText="Got it"
+        message={
+          successModalData?.action === 'Lock' ? (
+            <>
+              Access for <strong>{successModalData?.businessName}</strong> has been successfully revoked.
+            </>
+          ) : successModalData?.action === 'Unlock' ? (
+            <>
+              Access for <strong>{successModalData?.businessName}</strong> has been successfully restored.
+            </>
+          ) : (
+            <>
+              Tenant <strong>{successModalData?.businessName}</strong> has been created and added to the system.
+            </>
+          )
+        }
+        primaryButtonText="Close"
         onPrimaryClick={() => setSuccessModalData(null)}
-        secondaryButtonText="Close"
       />
     </div>
   );
