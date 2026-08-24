@@ -21,12 +21,15 @@ export function useDashboard() {
       setLoading(true);
     }
     try {
-      const summary = await dashboardService.getDashboardSummary();
+      const [summary, growth] = await Promise.all([
+        dashboardService.getDashboardSummary(),
+        dashboardService.getTenantGrowth()
+      ]);
       const newData = {
         totalTenants: summary.totalTenants || 0,
         activeSubscriptions: summary.activeTenants || 0,
         pastDueCount: summary.overdueInvoices || 0,
-        growthData: summary.growthData || [],
+        growthData: growth || [],
         pastDueClients: summary.pastDueClients || [],
       };
       dashboardCache = newData;

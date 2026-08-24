@@ -23,12 +23,19 @@ export const invoiceService = {
   },
 
   async updateInvoiceStatus(id, status) {
-    const response = await apiClient.patch(`/invoices/${id}/status`, { status });
-    return response.data;
+    if (status === 'Paid') {
+      const response = await apiClient.patch(`/invoices/${id}/pay`, { paidAt: new Date().toISOString() });
+      return response.data;
+    } else if (status === 'Cancelled') {
+      const response = await apiClient.patch(`/invoices/${id}/cancel`);
+      return response.data;
+    } else {
+      throw new Error(`Unsupported status update to ${status}`);
+    }
   },
 
   async sendReminder(id) {
-    const response = await apiClient.post(`/invoices/${id}/remind`);
+    const response = await apiClient.post(`/invoices/${id}/send-reminder`);
     return response.data;
   },
 };
