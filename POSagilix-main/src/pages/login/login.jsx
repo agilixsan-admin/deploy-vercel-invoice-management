@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
+import pkg from '../../../package.json';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -119,6 +120,10 @@ const Login = () => {
         <p className="login-footer">
           Don't have an account? <a href="#">Contact admin</a>
         </p>
+      </div>
+      
+      <div style={{ position: 'absolute', bottom: '20px', color: 'rgba(255,255,255,0.7)', fontSize: '12px', fontWeight: '500' }}>
+        Agilix Console v{pkg.version}
       </div>
     </div>
   );
