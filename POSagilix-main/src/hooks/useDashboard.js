@@ -23,18 +23,21 @@ export function useDashboard() {
       setLoading(true);
     }
     try {
-      const [allTenantsMeta, activeTenantsMeta, unpaidInvoices, growth] = await Promise.all([
+      const [allTenantsMeta, activeTenantsMeta, allInvoices, growth] = await Promise.all([
         tenantService.getTenants({ limit: 1, returnMeta: true }),
         tenantService.getTenants({ status: 'ACTIVE', limit: 1, returnMeta: true }),
-        invoiceService.getInvoices({ status: 'Unpaid', limit: 100 }),
+        invoiceService.getInvoices({ limit: 100 }),
         dashboardService.getTenantGrowth()
       ]);
+      
+      const unpaidInvoices = (allInvoices || []).filter(inv => inv.status === 'PENDING' || inv.status === 'OVERDUE');
+      
       const newData = {
         totalTenants: allTenantsMeta.total || 0,
         activeSubscriptions: activeTenantsMeta.total || 0,
-        pastDueCount: unpaidInvoices ? unpaidInvoices.length : 0,
+        pastDueCount: unpaidInvoices.length,
         growthData: (growth || []).map(g => ({ month: g.month, tenants: g.count })),
-        pastDueClients: (unpaidInvoices || []).slice(0, 5).map(inv => ({
+        pastDueClients: unpaidInvoices.slice(0, 5).map(inv => ({
           id: inv.id,
           name: inv.tenant?.businessName || 'Unknown Tenant',
           dueDate: new Date(inv.dueDate).toLocaleDateString(),

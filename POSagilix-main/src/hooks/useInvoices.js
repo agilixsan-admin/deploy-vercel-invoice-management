@@ -130,6 +130,15 @@ export function useInvoices(invoiceId = null) {
 
   // Client-side search filtering (since backend doesn't support search param)
   const filteredInvoices = invoices.filter(inv => {
+    let matchesStatus = true;
+    if (activeTab === 'Paid') {
+      matchesStatus = inv.status === 'PAID';
+    } else if (activeTab === 'Unpaid') {
+      matchesStatus = inv.status === 'PENDING' || inv.status === 'OVERDUE';
+    }
+    
+    if (!matchesStatus) return false;
+    
     if (!searchTerm) return true;
     const lowerSearch = searchTerm.toLowerCase();
     return (

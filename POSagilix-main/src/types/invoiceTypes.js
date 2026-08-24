@@ -47,8 +47,8 @@ export function buildInvoiceFilterQueryParams(params = {}) {
     limit: params.limit || 50, // Fetch more to allow client-side search/pagination
   };
 
-  if (params.status && params.status !== 'All Invoices') {
-    query.status = params.status.toUpperCase();
+  if (params.status === 'Paid') {
+    query.status = 'PAID';
   }
 
   return query;
