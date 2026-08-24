@@ -532,7 +532,7 @@ function TenantManagement() {
 
       {/* Lock/Unlock Confirmation Modal */}
       {lockingTenant && (
-        <div className="modal-overlay" onClick={() => setLockingTenant(null)}>
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setLockingTenant(null)}>
           <div className="modal modal-sm">
             <div className="modal-header">
               <h2 className="modal-title">
@@ -598,6 +598,7 @@ function TenantManagement() {
         }
         primaryButtonText="Close"
         onPrimaryClick={() => setSuccessModalData(null)}
+        secondaryButtonText={null}
       />
     </div>
   );

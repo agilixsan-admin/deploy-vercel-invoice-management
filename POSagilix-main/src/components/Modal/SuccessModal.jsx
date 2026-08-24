@@ -30,9 +30,11 @@ export default function SuccessModal({
               {primaryButtonText}
             </button>
           )}
-          <button className="btn btn-secondary success-btn-secondary" onClick={onClose}>
-            {secondaryButtonText}
-          </button>
+          {secondaryButtonText && (
+            <button className="btn btn-secondary success-btn-secondary" onClick={onClose}>
+              {secondaryButtonText}
+            </button>
+          )}
         </div>
       </div>
     </div>
