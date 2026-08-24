@@ -10,7 +10,7 @@ function AddUserModal({ onClose, onSubmit }) {
     name: '',
     email: '',
     password: '',
-    role: 'Tenant Admin',
+    role: '',
     status: 'Active',
   });
 
@@ -58,6 +58,7 @@ function AddUserModal({ onClose, onSubmit }) {
               type="email"
               className="form-control"
               placeholder="user@example.com"
+              autoComplete="new-password"
               value={form.email}
               onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
               required
@@ -71,6 +72,7 @@ function AddUserModal({ onClose, onSubmit }) {
               type="password"
               className="form-control"
               placeholder="Min. 8 characters"
+              autoComplete="new-password"
               value={form.password}
               onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
               required
@@ -84,7 +86,9 @@ function AddUserModal({ onClose, onSubmit }) {
                 className="form-control form-select"
                 value={form.role}
                 onChange={(e) => setForm((p) => ({ ...p, role: e.target.value }))}
+                required
               >
+                <option value="" disabled>Select Role</option>
                 <option value="Super Admin">Super Admin</option>
                 <option value="Tenant Admin">Tenant Admin</option>
                 <option value="Cashier">Cashier</option>
@@ -96,6 +100,7 @@ function AddUserModal({ onClose, onSubmit }) {
                 className="form-control form-select"
                 value={form.status}
                 onChange={(e) => setForm((p) => ({ ...p, status: e.target.value }))}
+                disabled
               >
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
