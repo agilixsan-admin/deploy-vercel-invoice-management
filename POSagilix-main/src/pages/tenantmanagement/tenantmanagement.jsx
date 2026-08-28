@@ -14,8 +14,8 @@ function AddTenantModal({ onClose, onSubmit }) {
     planType: '',
     outlets: '',
     expiryDate: '',
-    webhookUrl: '',
-    apiKey: '',
+    erpWebhookUrl: '',
+    erpWebhookKey: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -124,8 +124,8 @@ function AddTenantModal({ onClose, onSubmit }) {
               type="url"
               className="form-control"
               placeholder="https://example.com/webhook"
-              value={form.webhookUrl}
-              onChange={(e) => setForm({ ...form, webhookUrl: e.target.value })}
+              value={form.erpWebhookUrl}
+              onChange={(e) => setForm({ ...form, erpWebhookUrl: e.target.value })}
             />
           </div>
           <div className="form-group">
@@ -134,8 +134,8 @@ function AddTenantModal({ onClose, onSubmit }) {
               type="text"
               className="form-control"
               placeholder="Your API Key"
-              value={form.apiKey}
-              onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
+              value={form.erpWebhookKey}
+              onChange={(e) => setForm({ ...form, erpWebhookKey: e.target.value })}
             />
           </div>
           <div className="modal-footer">
@@ -161,8 +161,8 @@ function EditTenantModal({ tenant, onClose, onSubmit }) {
     planType: tenant.planType?.toLowerCase() || 'yearly',
     outlets: tenant.outletCount || tenant.outlets,
     expiryDate: tenant.expiryDate,
-    webhookUrl: tenant.webhookUrl || '',
-    apiKey: tenant.apiKey || '',
+    erpWebhookUrl: tenant.erpWebhookUrl || '',
+    erpWebhookKey: tenant.erpWebhookKey || '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -265,8 +265,8 @@ function EditTenantModal({ tenant, onClose, onSubmit }) {
               type="url"
               className="form-control"
               placeholder="https://example.com/webhook"
-              value={form.webhookUrl}
-              onChange={(e) => setForm({ ...form, webhookUrl: e.target.value })}
+              value={form.erpWebhookUrl}
+              onChange={(e) => setForm({ ...form, erpWebhookUrl: e.target.value })}
             />
           </div>
           <div className="form-group">
@@ -275,8 +275,8 @@ function EditTenantModal({ tenant, onClose, onSubmit }) {
               type="text"
               className="form-control"
               placeholder="Your API Key"
-              value={form.apiKey}
-              onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
+              value={form.erpWebhookKey}
+              onChange={(e) => setForm({ ...form, erpWebhookKey: e.target.value })}
             />
           </div>
           <div className="modal-footer">
