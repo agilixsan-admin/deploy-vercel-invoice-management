@@ -1,6 +1,3 @@
-/**
- * Models and request body constructors for Tenant API endpoints
- */
 
 export function buildCreateTenantRequestBody(formData) {
   return {
@@ -10,8 +7,8 @@ export function buildCreateTenantRequestBody(formData) {
     planType: formData.planType?.toUpperCase() || 'YEARLY',
     outletCount: parseInt(formData.outlets, 10) || 1,
     expiryDate: formData.expiryDate || new Date().toISOString().split('T')[0],
-    webhookUrl: formData.webhookUrl?.trim() || null,
-    apiKey: formData.apiKey?.trim() || null,
+    erpWebhookUrl: formData.erpWebhookUrl?.trim() || null,
+    erpWebhookKey: formData.erpWebhookKey?.trim() || null,
   };
 }
 
