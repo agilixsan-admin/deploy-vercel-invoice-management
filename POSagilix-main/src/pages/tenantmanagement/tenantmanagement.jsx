@@ -3,6 +3,7 @@ import { Plus, Pencil, Lock, ChevronLeft, ChevronRight, X, Unlock } from 'lucide
 import { useTenants } from '../../hooks/useTenants';
 import { getStatusBadgeClass } from '../../lib/formatters';
 import SuccessModal from '../../components/Modal/SuccessModal';
+import DatePicker from '../../components/DatePicker/DatePicker';
 import '../style.css';
 
 // Add Tenant Modal Component
@@ -110,12 +111,12 @@ function AddTenantModal({ onClose, onSubmit }) {
           </div>
           <div className="form-group">
             <label className="form-label">Expiry Date</label>
-            <input
-              type="date"
-              className="form-control"
-              min={new Date().toISOString().split('T')[0]}
+            <DatePicker
+              mode="date"
+              minDate={new Date().toISOString().split('T')[0]}
               value={form.expiryDate}
-              onChange={(e) => setForm({ ...form, expiryDate: e.target.value })}
+              onChange={(val) => setForm({ ...form, expiryDate: val })}
+              placeholder="Select expiry date"
             />
           </div>
           <div className="form-group">
@@ -251,12 +252,12 @@ function EditTenantModal({ tenant, onClose, onSubmit }) {
           </div>
           <div className="form-group">
             <label className="form-label">Expiry Date</label>
-            <input
-              type="date"
-              className="form-control"
-              min={new Date().toISOString().split('T')[0]}
+            <DatePicker
+              mode="date"
+              minDate={new Date().toISOString().split('T')[0]}
               value={form.expiryDate}
-              onChange={(e) => setForm({ ...form, expiryDate: e.target.value })}
+              onChange={(val) => setForm({ ...form, expiryDate: val })}
+              placeholder="Select expiry date"
             />
           </div>
           <div className="form-group">

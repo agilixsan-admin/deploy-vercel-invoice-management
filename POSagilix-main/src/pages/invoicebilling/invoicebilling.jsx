@@ -5,15 +5,18 @@ import { useInvoices } from '../../hooks/useInvoices';
 import { useTenants } from '../../hooks/useTenants';
 import { getStatusBadgeClass } from '../../lib/formatters';
 import SuccessModal from '../../components/Modal/SuccessModal';
+import DatePicker from '../../components/DatePicker/DatePicker';
 import '../style.css';
 
 // Create Invoice Modal Component
 function CreateInvoiceModal({ onClose, onSubmit }) {
   const { tenants } = useTenants();
+  const currentMonthStr = new Date().toISOString().slice(0, 7);
   
   const [form, setForm] = useState({
     tenantId: '',
-    billingPeriod: new Date().toISOString().slice(0, 7), // YYYY-MM
+    billingPeriod: currentMonthStr, // YYYY-MM
+    dueDate: `${currentMonthStr}-15`, // YYYY-MM-DD
     amount: '',
     notes: '',
   });
@@ -24,6 +27,14 @@ function CreateInvoiceModal({ onClose, onSubmit }) {
     e.preventDefault();
     if (!form.tenantId) {
       setError('Please select a tenant.');
+      return;
+    }
+    if (!form.billingPeriod) {
+      setError('Please select a billing period.');
+      return;
+    }
+    if (!form.dueDate) {
+      setError('Please select a due date.');
       return;
     }
     if (!form.amount) {
@@ -75,12 +86,28 @@ function CreateInvoiceModal({ onClose, onSubmit }) {
             <label className="form-label">
               Billing Period <span className="required">*</span>
             </label>
-            <input
-              type="month"
-              className="form-control"
+            <DatePicker
+              mode="month"
               value={form.billingPeriod}
-              onChange={(e) => setForm({ ...form, billingPeriod: e.target.value })}
-              required
+              onChange={(val) => {
+                setForm((prev) => ({
+                  ...prev,
+                  billingPeriod: val,
+                  dueDate: val ? `${val}-15` : prev.dueDate,
+                }));
+              }}
+              placeholder="Select billing period"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">
+              Due Date <span className="required">*</span>
+            </label>
+            <DatePicker
+              mode="date"
+              value={form.dueDate}
+              onChange={(val) => setForm((prev) => ({ ...prev, dueDate: val }))}
+              placeholder="Select payment due date"
             />
           </div>
           <div className="form-group">

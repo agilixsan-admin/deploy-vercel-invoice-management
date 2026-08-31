@@ -3,34 +3,34 @@
  */
 
 export function buildCreateInvoiceRequestBody(formData) {
-  const monthMap = {
-    January: '01', February: '02', March: '03', April: '04', May: '05', June: '06',
-    July: '07', August: '08', September: '09', October: '10', November: '11', December: '12'
-  };
-  
   let billingPeriod = formData.billingPeriod;
   let yearStr, monthStr;
 
   if (billingPeriod) {
     [yearStr, monthStr] = billingPeriod.split('-');
   } else {
-    monthStr = monthMap[formData.billingMonth] || '10';
-    yearStr = formData.billingYear || new Date().getFullYear().toString();
+    const now = new Date();
+    yearStr = now.getFullYear().toString();
+    monthStr = String(now.getMonth() + 1).padStart(2, '0');
     billingPeriod = `${yearStr}-${monthStr}`;
   }
 
-  const dueDate = `${yearStr}-${monthStr}-15`;
-
+  const dueDate = formData.dueDate || `${yearStr}-${monthStr}-15`;
   const amountStr = String(formData.amount || '0').replace(/[^0-9]/g, '');
   const amount = parseInt(amountStr, 10) || 0;
 
-  return {
+  const body = {
     tenantId: formData.tenantId,
     amount,
     billingPeriod,
     dueDate,
-    notes: formData.notes || '',
   };
+
+  if (formData.notes?.trim()) {
+    body.notes = formData.notes.trim();
+  }
+
+  return body;
 }
 
 export function buildUpdateInvoiceStatusRequestBody(id, status) {
