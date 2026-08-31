@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { dashboardService } from '../services/dashboardService';
 import { invoiceService } from '../services/invoiceService';
 import { tenantService } from '../services/tenantService';
+import { useRealtimeEvents } from './useRealtimeEvents';
 
 // Global cache outside the hook
 let dashboardCache = null;
@@ -22,7 +23,7 @@ export function useDashboard() {
   );
   const [loading, setLoading] = useState(!dashboardCache);
 
-  const fetchDashboard = async () => {
+  const fetchDashboard = useCallback(async () => {
     if (!dashboardCache) {
       setLoading(true);
     }
@@ -54,11 +55,25 @@ export function useDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchDashboard();
-  }, []);
+  }, [fetchDashboard]);
+
+  // Realtime SSE event listener for automatic live dashboard metrics
+  useRealtimeEvents((eventObj) => {
+    if (
+      eventObj?.event &&
+      (eventObj.event.startsWith('tenant.') ||
+        eventObj.event.startsWith('invoice.') ||
+        eventObj.event.startsWith('payment.'))
+    ) {
+      console.log('[Realtime] Event received in useDashboard:', eventObj.event);
+      clearDashboardCache();
+      fetchDashboard();
+    }
+  });
 
   return {
     ...data,

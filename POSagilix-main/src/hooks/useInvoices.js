@@ -1,10 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { invoiceService } from '../services/invoiceService';
 import { clearDashboardCache } from './useDashboard';
+import { useRealtimeEvents } from './useRealtimeEvents';
 import { buildCreateInvoiceRequestBody } from '../types/invoiceTypes';
 
 const invoicesCache = new Map();
+
+export const clearInvoicesCache = () => {
+  invoicesCache.clear();
+};
 
 export function useInvoices(invoiceId = null) {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -36,7 +41,7 @@ export function useInvoices(invoiceId = null) {
     if (tab !== null) setActiveTab(tab);
   }, [searchParams]);
 
-  const loadInvoices = async () => {
+  const loadInvoices = useCallback(async () => {
     const cacheKey = getCacheKey();
     const detailKey = `detail-${invoiceId}`;
     
@@ -61,7 +66,7 @@ export function useInvoices(invoiceId = null) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [invoiceId, searchTerm, activeTab]);
 
   useEffect(() => {
     const cacheKey = getCacheKey();
@@ -76,7 +81,21 @@ export function useInvoices(invoiceId = null) {
     }
     
     loadInvoices();
-  }, [invoiceId, searchTerm, activeTab]);
+  }, [invoiceId, searchTerm, activeTab, loadInvoices]);
+
+  // Realtime SSE event listener for automatic live invoice updates
+  useRealtimeEvents((eventObj) => {
+    if (
+      eventObj?.event &&
+      (eventObj.event.startsWith('invoice.') ||
+        eventObj.event.startsWith('payment.'))
+    ) {
+      console.log('[Realtime] Invoice event received in useInvoices:', eventObj.event);
+      clearInvoicesCache();
+      clearDashboardCache();
+      loadInvoices();
+    }
+  });
 
   const updateQueryParams = (newParams) => {
     const params = new URLSearchParams(searchParams);
@@ -110,6 +129,7 @@ export function useInvoices(invoiceId = null) {
       ...createdInvoice,
       tenantName: tenantName || createdInvoice.tenant?.businessName
     });
+    clearInvoicesCache();
     clearDashboardCache();
     await loadInvoices();
   };
@@ -117,6 +137,7 @@ export function useInvoices(invoiceId = null) {
   const handleUpdateStatus = async (id, status) => {
     await invoiceService.updateInvoiceStatus(id, status);
     showToast(`Invoice ${id} marked as ${status}.`);
+    clearInvoicesCache();
     clearDashboardCache();
     await loadInvoices();
   };

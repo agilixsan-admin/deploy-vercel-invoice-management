@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { tenantService } from '../services/tenantService';
 import { clearDashboardCache } from './useDashboard';
+import { useRealtimeEvents } from './useRealtimeEvents';
 import {
   buildCreateTenantRequestBody,
   buildUpdateTenantRequestBody,
 } from '../types/tenantTypes';
 
 const tenantsCache = new Map();
+
+export const clearTenantsCache = () => {
+  tenantsCache.clear();
+};
 
 export function useTenants() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -42,7 +47,7 @@ export function useTenants() {
     if (status !== null) setFilterStatus(status);
   }, [searchParams]);
 
-  const loadTenants = async () => {
+  const loadTenants = useCallback(async () => {
     const cacheKey = getCacheKey();
     if (!tenantsCache.has(cacheKey)) {
       setLoading(true);
@@ -61,7 +66,7 @@ export function useTenants() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, filterPlan, filterStatus]);
 
   useEffect(() => {
     // If we have cache, we still revalidate in the background
@@ -71,7 +76,17 @@ export function useTenants() {
       setLoading(false);
     }
     loadTenants();
-  }, [searchTerm, filterPlan, filterStatus]);
+  }, [searchTerm, filterPlan, filterStatus, loadTenants]);
+
+  // Realtime SSE event listener for automatic live updates
+  useRealtimeEvents((eventObj) => {
+    if (eventObj?.event && eventObj.event.startsWith('tenant.')) {
+      console.log('[Realtime] Tenant event received in useTenants:', eventObj.event);
+      clearTenantsCache();
+      clearDashboardCache();
+      loadTenants();
+    }
+  });
 
   // Update URL search params
   const updateQueryParams = (newParams) => {
@@ -110,6 +125,7 @@ export function useTenants() {
     const createdTenant = await tenantService.createTenant(payload);
     setShowAddModal(false);
     setSuccessModalData(createdTenant);
+    clearTenantsCache();
     clearDashboardCache();
     await loadTenants();
   };
@@ -117,22 +133,25 @@ export function useTenants() {
   const handleEditTenant = async (id, formData) => {
     const payload = buildUpdateTenantRequestBody(id, {
       businessName: formData.businessName,
+      ownerName: formData.ownerName,
       ownerEmail: formData.ownerEmail,
-      plan: formData.planType === 'yearly' ? 'Yearly plan' : 'Monthly plan',
+      ownerPhone: formData.ownerPhone,
       planType: formData.planType,
-      outlets: parseInt(formData.outlets, 10) || 1,
+      outletCount: parseInt(formData.outlets || formData.outletCount, 10) || 1,
       expiryDate: formData.expiryDate,
-      webhookUrl: formData.webhookUrl || null,
-      apiKey: formData.apiKey || null,
+      erpWebhookUrl: formData.erpWebhookUrl || undefined,
+      erpWebhookKey: formData.erpWebhookKey || undefined,
     });
     await tenantService.updateTenant(id, payload);
     setEditingTenant(null);
+    clearTenantsCache();
     clearDashboardCache();
     await loadTenants();
   };
 
   const handleToggleLock = async (id, isLocked) => {
     await tenantService.toggleLockTenant(id, isLocked);
+    clearTenantsCache();
     clearDashboardCache();
     await loadTenants();
   };
@@ -140,6 +159,7 @@ export function useTenants() {
   const handleDeleteTenant = async (id) => {
     await tenantService.deleteTenant(id);
     setDeletingTenantId(null);
+    clearTenantsCache();
     clearDashboardCache();
     await loadTenants();
   };

@@ -159,8 +159,8 @@ function EditTenantModal({ tenant, onClose, onSubmit }) {
     ownerName: tenant.ownerName || '',
     ownerEmail: tenant.ownerEmail,
     planType: tenant.planType?.toLowerCase() || 'yearly',
-    outlets: tenant.outletCount || tenant.outlets,
-    expiryDate: tenant.expiryDate,
+    outlets: tenant.outletCount || tenant.outlets || 1,
+    expiryDate: tenant.expiryDate ? tenant.expiryDate.split('T')[0] : '',
     erpWebhookUrl: tenant.erpWebhookUrl || '',
     erpWebhookKey: tenant.erpWebhookKey || '',
   });
