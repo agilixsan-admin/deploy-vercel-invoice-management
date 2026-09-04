@@ -5,7 +5,7 @@ import {
   UserCog,
   FileText,
   ClipboardList,
-  Settings,
+  // Settings,
   X
 } from 'lucide-react';
 import './Sidebar.css';
@@ -16,7 +16,7 @@ const navItems = [
   { path: '/user-management', icon: UserCog, label: 'User Management' },
   { path: '/invoice-billing', icon: FileText, label: 'Invoice & Billing' },
   { path: '/audit-trail', icon: ClipboardList, label: 'Audit Trail' },
-  { path: '/settings', icon: Settings, label: 'Settings' },
+  // { path: '/settings', icon: Settings, label: 'Settings' },
 ];
 
 function Sidebar({ isOpen, onClose }) {
