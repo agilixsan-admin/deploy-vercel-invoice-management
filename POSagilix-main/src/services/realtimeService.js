@@ -1,9 +1,10 @@
 /**
  * Realtime SSE Client for Agilix Console Service
- * Connects to /api/v1/events and emits events to subscribers
+ * Connects to /api/v1/events using fetch + Authorization header
+ * (EventSource tidak support custom header, sehingga tidak digunakan)
  */
 const listeners = new Set();
-let eventSource = null;
+let abortController = null;
 let reconnectTimeout = null;
 
 const SUPPORTED_EVENTS = [
@@ -23,61 +24,86 @@ const SUPPORTED_EVENTS = [
 ];
 
 export const realtimeService = {
-  connect() {
+  async connect() {
     const token = localStorage.getItem('access_token');
     if (!token) return;
 
-    if (eventSource && eventSource.readyState !== EventSource.CLOSED) {
-      return;
-    }
+    if (abortController) return;
 
     const apiBaseUrl =
       import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
-    const sseUrl = `${apiBaseUrl}/events?token=${encodeURIComponent(token)}`;
+
+    abortController = new AbortController();
 
     try {
-      eventSource = new EventSource(sseUrl);
-
-      eventSource.onopen = () => {
-        console.log('[SSE] Connected to Agilix Realtime Events stream');
-      };
-
-      SUPPORTED_EVENTS.forEach((eventName) => {
-        eventSource.addEventListener(eventName, (e) => {
-          try {
-            const parsed = JSON.parse(e.data);
-            listeners.forEach((listener) => {
-              try {
-                listener({ event: eventName, ...parsed });
-              } catch (err) {
-                console.error('[SSE] Listener error:', err);
-              }
-            });
-          } catch (err) {
-            console.error('[SSE] Parse event error:', err);
-          }
-        });
+      const response = await fetch(`${apiBaseUrl}/events`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'text/event-stream',
+        },
+        signal: abortController.signal,
       });
 
-      eventSource.onerror = (err) => {
-        console.warn('[SSE] Connection lost, reconnecting in 5s...', err);
-        eventSource?.close();
-        eventSource = null;
-        clearTimeout(reconnectTimeout);
-        reconnectTimeout = setTimeout(() => {
-          this.connect();
-        }, 5000);
-      };
-    } catch (e) {
-      console.error('[SSE] Failed to initialize EventSource:', e);
+      if (!response.ok || !response.body) {
+        throw new Error(`SSE connection failed: ${response.status}`);
+      }
+
+      console.log('[SSE] Connected to Agilix Realtime Events stream');
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+
+        let eventType = 'message';
+        let dataLine = '';
+
+        for (const line of lines) {
+          if (line.startsWith('event:')) {
+            eventType = line.slice(6).trim();
+          } else if (line.startsWith('data:')) {
+            dataLine = line.slice(5).trim();
+          } else if (line === '' && dataLine) {
+            if (SUPPORTED_EVENTS.includes(eventType)) {
+              try {
+                const parsed = JSON.parse(dataLine);
+                listeners.forEach((listener) => {
+                  try {
+                    listener({ event: eventType, ...parsed });
+                  } catch (err) {
+                    console.error('[SSE] Listener error:', err);
+                  }
+                });
+              } catch (err) {
+                console.error('[SSE] Parse error:', err);
+              }
+            }
+            eventType = 'message';
+            dataLine = '';
+          }
+        }
+      }
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+      console.warn('[SSE] Connection lost, reconnecting in 5s...', err);
+      abortController = null;
+      clearTimeout(reconnectTimeout);
+      reconnectTimeout = setTimeout(() => this.connect(), 5000);
     }
   },
 
   disconnect() {
     clearTimeout(reconnectTimeout);
-    if (eventSource) {
-      eventSource.close();
-      eventSource = null;
+    if (abortController) {
+      abortController.abort();
+      abortController = null;
       console.log('[SSE] Disconnected from stream');
     }
   },
@@ -93,4 +119,3 @@ export const realtimeService = {
     };
   },
 };
-
