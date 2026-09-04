@@ -131,7 +131,7 @@ function AuditTrail() {
             <button
               className="pagination-btn"
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
             >
               <ChevronLeft size={16} />
             </button>
@@ -147,7 +147,7 @@ function AuditTrail() {
             <button
               className="pagination-btn"
               disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
             >
               <ChevronRight size={16} />
             </button>

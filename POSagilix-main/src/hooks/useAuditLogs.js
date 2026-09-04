@@ -1,69 +1,50 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { auditService } from '../services/auditService';
-
-const auditLogsCache = new Map();
 
 export function useAuditLogs() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Search & Filter state
-  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
-  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
-  const [selectedDate, setSelectedDate] = useState(searchParams.get('date') || '');
+  const [searchTerm, setSearchTermState] = useState(searchParams.get('q') || '');
+  const [selectedCategory, setSelectedCategoryState] = useState(searchParams.get('category') || 'all');
+  const [selectedDate, setSelectedDateState] = useState(searchParams.get('date') || '');
+  const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 1);
+  const itemsPerPage = 10;
 
-  const getCacheKey = () => `${searchTerm}-${selectedCategory}-${selectedDate}`;
+  const [logs, setLogs] = useState([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
 
-  const [logs, setLogs] = useState(auditLogsCache.get(getCacheKey()) || []);
-  const [loading, setLoading] = useState(!auditLogsCache.has(getCacheKey()));
-
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-
-  useEffect(() => {
-    const q = searchParams.get('q');
-    const category = searchParams.get('category');
-    const date = searchParams.get('date');
-    if (q !== null) setSearchTerm(q);
-    if (category !== null) setSelectedCategory(category);
-    if (date !== null) setSelectedDate(date);
-  }, [searchParams]);
-
-  const loadAuditLogs = async () => {
-    const cacheKey = getCacheKey();
-    if (!auditLogsCache.has(cacheKey)) {
-      setLoading(true);
-    }
+  const loadAuditLogs = useCallback(async (params) => {
+    setLoading(true);
     try {
-      const data = await auditService.getAuditLogs({
-        search: searchTerm,
-        category: selectedCategory,
-        date: selectedDate,
-      });
-      auditLogsCache.set(cacheKey, data);
-      setLogs(data);
+      const data = await auditService.getAuditLogs(params);
+      setLogs(data.items ?? data);
+      setTotalCount(data.total ?? data.length);
+      setTotalPages(data.totalPages ?? 1);
     } catch (err) {
       console.error('Failed to load audit logs:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    const cacheKey = getCacheKey();
-    if (auditLogsCache.has(cacheKey)) {
-      setLogs(auditLogsCache.get(cacheKey));
-      setLoading(false);
-    }
-    loadAuditLogs();
-  }, [searchTerm, selectedCategory, selectedDate]);
+    loadAuditLogs({
+      category: selectedCategory,
+      date: selectedDate,
+      search: searchTerm,
+      page: currentPage,
+      limit: itemsPerPage,
+    });
+  }, [searchTerm, selectedCategory, selectedDate, currentPage, loadAuditLogs]);
 
   const updateQueryParams = (newParams) => {
     const params = new URLSearchParams(searchParams);
     Object.entries(newParams).forEach(([key, val]) => {
       if (val && val !== 'all') {
-        params.set(key, val);
+        params.set(key, String(val));
       } else {
         params.delete(key);
       }
@@ -72,21 +53,26 @@ export function useAuditLogs() {
   };
 
   const handleSearchChange = (val) => {
-    setSearchTerm(val);
+    setSearchTermState(val);
     setCurrentPage(1);
-    updateQueryParams({ q: val, category: selectedCategory, date: selectedDate });
+    updateQueryParams({ q: val, category: selectedCategory, date: selectedDate, page: 1 });
   };
 
   const handleCategoryChange = (val) => {
-    setSelectedCategory(val);
+    setSelectedCategoryState(val);
     setCurrentPage(1);
-    updateQueryParams({ q: searchTerm, category: val, date: selectedDate });
+    updateQueryParams({ q: searchTerm, category: val, date: selectedDate, page: 1 });
   };
 
   const handleDateChange = (val) => {
-    setSelectedDate(val);
+    setSelectedDateState(val);
     setCurrentPage(1);
-    updateQueryParams({ q: searchTerm, category: selectedCategory, date: val });
+    updateQueryParams({ q: searchTerm, category: selectedCategory, date: val, page: 1 });
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    updateQueryParams({ q: searchTerm, category: selectedCategory, date: selectedDate, page });
   };
 
   const handleExportCSV = async () => {
@@ -101,16 +87,9 @@ export function useAuditLogs() {
     document.body.removeChild(link);
   };
 
-  // Pagination calculation
-  const totalPages = Math.ceil(logs.length / itemsPerPage) || 1;
-  const paginatedLogs = logs.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
   return {
-    logs: paginatedLogs,
-    totalCount: logs.length,
+    logs,
+    totalCount,
     loading,
     searchTerm,
     selectedCategory,
@@ -121,8 +100,14 @@ export function useAuditLogs() {
     setSearchTerm: handleSearchChange,
     setSelectedCategory: handleCategoryChange,
     setSelectedDate: handleDateChange,
-    setCurrentPage,
+    setCurrentPage: handlePageChange,
     handleExportCSV,
-    reloadLogs: loadAuditLogs,
+    reloadLogs: () => loadAuditLogs({
+      category: selectedCategory,
+      date: selectedDate,
+      search: searchTerm,
+      page: currentPage,
+      limit: itemsPerPage,
+    }),
   };
 }
