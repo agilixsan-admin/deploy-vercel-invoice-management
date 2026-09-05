@@ -531,3 +531,82 @@
 .profile-menu-item:hover {
   background: #fef2f2;
 }
+
+/* Reset Password menu item - blue tint */
+.profile-menu-item--reset {
+  color: var(--blue-primary) !important;
+}
+
+.profile-menu-item--reset:hover {
+  background: var(--blue-light) !important;
+}
+
+/* Divider between menu items */
+.profile-menu-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 4px 0;
+}
+
+/* ===== RESET PASSWORD MODAL ===== */
+.reset-pw-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.reset-pw-input-wrap .form-control {
+  padding-right: 40px;
+}
+
+.reset-pw-eye {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.reset-pw-eye:hover {
+  color: var(--text-primary);
+}
+
+/* Success state */
+.reset-success-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px;
+  gap: 12px;
+  text-align: center;
+}
+
+.reset-success-icon {
+  color: #16a34a;
+  animation: successPop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes successPop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.reset-success-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.reset-success-sub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}

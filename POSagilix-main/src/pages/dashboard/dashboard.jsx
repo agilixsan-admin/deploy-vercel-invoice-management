@@ -5,10 +5,35 @@ import {
   Download, Plus, TrendingUp, Users, CheckCircle, AlertTriangle,
   MoreHorizontal, Send
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDashboard } from '../../hooks/useDashboard';
 import { invoiceService } from '../../services/invoiceService';
 import '../style.css';
+
+// Realtime clock hook
+function useRealtimeClock() {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  return now;
+}
+
+// Format: Sabtu, 05 September 2026 • 07:46:21
+function formatDateTime(date) {
+  const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const months = ['Januari','Februari','Maret','April','Mei','Juni',
+                  'Juli','Agustus','September','Oktober','November','Desember'];
+  const dayName = days[date.getDay()];
+  const d = date.getDate().toString().padStart(2, '0');
+  const m = months[date.getMonth()];
+  const y = date.getFullYear();
+  const hh = date.getHours().toString().padStart(2, '0');
+  const mm = date.getMinutes().toString().padStart(2, '0');
+  const ss = date.getSeconds().toString().padStart(2, '0');
+  return `${dayName}, ${d} ${m} ${y} • ${hh}:${mm}:${ss}`;
+}
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -33,6 +58,15 @@ function Dashboard() {
   } = useDashboard();
   
   const [remindingId, setRemindingId] = useState(null);
+  const now = useRealtimeClock();
+
+  // Get user name from localStorage
+  const userInfoStr = localStorage.getItem('user_info');
+  let userName = 'Admin';
+  try {
+    const userInfo = userInfoStr ? JSON.parse(userInfoStr) : null;
+    userName = userInfo?.fullName || userInfo?.name || 'Admin';
+  } catch(e) {}
 
   const handleSendReminder = async (id) => {
     setRemindingId(id);
@@ -77,8 +111,8 @@ function Dashboard() {
       {/* Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">Welcome back, Admin</h1>
-          <p className="page-subtitle dashboard-date">Oct 24, 2024</p>
+          <h1 className="page-title">Welcome back, {userName} 👋</h1>
+          <p className="page-subtitle dashboard-date dashboard-realtime-clock">{formatDateTime(now)}</p>
         </div>
         <div className="page-actions">
           <button className="btn btn-secondary">

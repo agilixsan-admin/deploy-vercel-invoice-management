@@ -1,10 +1,19 @@
 import { useState } from 'react';
-import { Plus, Pencil, Lock, ChevronLeft, ChevronRight, X, Unlock } from 'lucide-react';
+import { Plus, Pencil, Lock, ChevronLeft, ChevronRight, X, Unlock, AlertTriangle, Mail } from 'lucide-react';
 import { useTenants } from '../../hooks/useTenants';
 import { getStatusBadgeClass } from '../../lib/formatters';
 import SuccessModal from '../../components/Modal/SuccessModal';
 import DatePicker from '../../components/DatePicker/DatePicker';
 import '../style.css';
+
+// Helper: returns true if tenant is expired more than 3 days
+const isExpiredMoreThan3Days = (expiryDate) => {
+  if (!expiryDate) return false;
+  const expiry = new Date(expiryDate);
+  const now = new Date();
+  const diffDays = (now - expiry) / (1000 * 60 * 60 * 24);
+  return diffDays > 3;
+};
 
 // Add Tenant Modal Component
 function AddTenantModal({ onClose, onSubmit }) {
@@ -20,11 +29,16 @@ function AddTenantModal({ onClose, onSubmit }) {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  // Step: 'form' | 'confirm'
+  const [step, setStep] = useState('form');
 
-  const handleSubmit = async (e) => {
+  const handleFormNext = (e) => {
     e.preventDefault();
     if (!form.businessName || !form.ownerEmail) return;
-    
+    setStep('confirm');
+  };
+
+  const handleConfirmSubmit = async () => {
     setIsSubmitting(true);
     setError(null);
     try {
@@ -35,6 +49,7 @@ function AddTenantModal({ onClose, onSubmit }) {
         errorMsg = 'Expiry Date Must Be a Future Date';
       }
       setError(errorMsg);
+      setStep('form');
       setIsSubmitting(false);
     }
   };
@@ -43,115 +58,186 @@ function AddTenantModal({ onClose, onSubmit }) {
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && !isSubmitting && onClose()}>
       <div className="modal">
         <div className="modal-header">
-          <h2 className="modal-title">Add New Tenant</h2>
+          <h2 className="modal-title">{step === 'confirm' ? 'Confirm New Tenant' : 'Add New Tenant'}</h2>
           {!isSubmitting && (
             <button className="modal-close" onClick={onClose} type="button">
               <X size={18} />
             </button>
           )}
         </div>
-        <form onSubmit={handleSubmit}>
-          {error && <div className="modal-error-alert">{error}</div>}
-          <div className="form-group">
-            <label className="form-label">Business Name <span className="required">*</span></label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="e.g. Warung Kopi Nusantara"
-              value={form.businessName}
-              onChange={(e) => setForm({ ...form, businessName: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Owner Name <span className="required">*</span></label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="e.g. Budi Santoso"
-              value={form.ownerName}
-              onChange={(e) => setForm({ ...form, ownerName: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Owner Email <span className="required">*</span></label>
-            <input
-              type="email"
-              className="form-control"
-              placeholder="owner@example.com"
-              value={form.ownerEmail}
-              onChange={(e) => setForm({ ...form, ownerEmail: e.target.value })}
-              required
-            />
-          </div>
-          <div className="select-row">
+
+        {/* ── STEP 1: Form ── */}
+        {step === 'form' && (
+          <form onSubmit={handleFormNext}>
+            {error && <div className="modal-error-alert">{error}</div>}
             <div className="form-group">
-              <label className="form-label">Plan Type</label>
-              <select
-                className="form-control form-select"
-                value={form.planType}
-                onChange={(e) => setForm({ ...form, planType: e.target.value })}
-              >
-                <option value="" disabled>Select Plan Type</option>
-                <option value="yearly">Yearly Plan</option>
-                <option value="monthly">Monthly Plan</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Outlets</label>
+              <label className="form-label">Business Name <span className="required">*</span></label>
               <input
-                type="number"
-                min="1"
+                type="text"
                 className="form-control"
-                value={form.outlets}
-                onChange={(e) => setForm({ ...form, outlets: e.target.value })}
+                placeholder="e.g. Warung Kopi Nusantara"
+                value={form.businessName}
+                onChange={(e) => setForm({ ...form, businessName: e.target.value })}
                 required
               />
             </div>
+            <div className="form-group">
+              <label className="form-label">Owner Name <span className="required">*</span></label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="e.g. Budi Santoso"
+                value={form.ownerName}
+                onChange={(e) => setForm({ ...form, ownerName: e.target.value })}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Owner Email <span className="required">*</span></label>
+              <input
+                type="email"
+                className="form-control"
+                placeholder="owner@example.com"
+                value={form.ownerEmail}
+                onChange={(e) => setForm({ ...form, ownerEmail: e.target.value })}
+                required
+              />
+              {/* Email spam note */}
+              <div className="email-spam-note">
+                <Mail size={12} />
+                <span>Email aktivasi akan dikirim ke alamat ini. Jika tidak ditemukan, harap periksa folder <strong>Spam / Junk</strong>.</span>
+              </div>
+            </div>
+            <div className="select-row">
+              <div className="form-group">
+                <label className="form-label">Plan Type</label>
+                <select
+                  className="form-control form-select"
+                  value={form.planType}
+                  onChange={(e) => setForm({ ...form, planType: e.target.value })}
+                >
+                  <option value="" disabled>Select Plan Type</option>
+                  <option value="yearly">Yearly Plan</option>
+                  <option value="monthly">Monthly Plan</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Outlets</label>
+                <input
+                  type="number"
+                  min="1"
+                  className="form-control"
+                  value={form.outlets}
+                  onChange={(e) => setForm({ ...form, outlets: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Expiry Date</label>
+              <DatePicker
+                mode="date"
+                minDate={new Date().toISOString().split('T')[0]}
+                value={form.expiryDate}
+                onChange={(val) => setForm({ ...form, expiryDate: val })}
+                placeholder="Select expiry date"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Webhook URL</label>
+              <input
+                type="url"
+                className="form-control"
+                placeholder="https://example.com/webhook"
+                value={form.erpWebhookUrl}
+                onChange={(e) => setForm({ ...form, erpWebhookUrl: e.target.value })}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">API Key</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Your API Key"
+                value={form.erpWebhookKey}
+                onChange={(e) => setForm({ ...form, erpWebhookKey: e.target.value })}
+                required
+              />
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={onClose}>
+                Cancel
+              </button>
+              <button type="submit" className="btn btn-primary">
+                Next: Review
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* ── STEP 2: Confirmation ── */}
+        {step === 'confirm' && (
+          <div>
+            {error && <div className="modal-error-alert">{error}</div>}
+            <div className="confirm-tenant-body">
+              <div className="confirm-tenant-icon">
+                <AlertTriangle size={28} />
+              </div>
+              <p className="confirm-tenant-title">Konfirmasi Penambahan Tenant</p>
+              <p className="confirm-tenant-sub">Pastikan data berikut sudah benar sebelum menyimpan.</p>
+              <div className="confirm-tenant-details">
+                <div className="confirm-detail-row">
+                  <span className="confirm-detail-label">Business Name</span>
+                  <span className="confirm-detail-value">{form.businessName}</span>
+                </div>
+                <div className="confirm-detail-row">
+                  <span className="confirm-detail-label">Owner Name</span>
+                  <span className="confirm-detail-value">{form.ownerName || '-'}</span>
+                </div>
+                <div className="confirm-detail-row">
+                  <span className="confirm-detail-label">Owner Email</span>
+                  <span className="confirm-detail-value">{form.ownerEmail}</span>
+                </div>
+                <div className="confirm-detail-row">
+                  <span className="confirm-detail-label">Plan Type</span>
+                  <span className="confirm-detail-value">{form.planType || '-'}</span>
+                </div>
+                <div className="confirm-detail-row">
+                  <span className="confirm-detail-label">Outlets</span>
+                  <span className="confirm-detail-value">{form.outlets || '-'}</span>
+                </div>
+                <div className="confirm-detail-row">
+                  <span className="confirm-detail-label">Expiry Date</span>
+                  <span className="confirm-detail-value">{form.expiryDate || '-'}</span>
+                </div>
+              </div>
+              <div className="email-spam-note" style={{ marginTop: '12px' }}>
+                <Mail size={12} />
+                <span>Email aktivasi akan dikirim ke <strong>{form.ownerEmail}</strong>. Ingatkan owner untuk memeriksa folder <strong>Spam / Junk</strong>.</span>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setStep('form')}
+                disabled={isSubmitting}
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleConfirmSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating...' : 'Confirm & Create'}
+              </button>
+            </div>
           </div>
-          <div className="form-group">
-            <label className="form-label">Expiry Date</label>
-            <DatePicker
-              mode="date"
-              minDate={new Date().toISOString().split('T')[0]}
-              value={form.expiryDate}
-              onChange={(val) => setForm({ ...form, expiryDate: val })}
-              placeholder="Select expiry date"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">Webhook URL</label>
-            <input
-              type="url"
-              className="form-control"
-              placeholder="https://example.com/webhook"
-              value={form.erpWebhookUrl}
-              onChange={(e) => setForm({ ...form, erpWebhookUrl: e.target.value })}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">API Key</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Your API Key"
-              value={form.erpWebhookKey}
-              onChange={(e) => setForm({ ...form, erpWebhookKey: e.target.value })}
-              required
-            />
-          </div>
-          <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={isSubmitting}>
-              Cancel
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
-              {isSubmitting ? 'Creating...' : 'Create Tenant'}
-            </button>
-          </div>
-        </form>
+        )}
       </div>
     </div>
   );
@@ -412,13 +498,21 @@ function TenantManagement() {
                   </td>
                 </tr>
               ) : (
-                tenants.map((tenant) => (
-                <tr key={tenant.id} className={tenant.status === 'LOCKED' ? 'row-locked' : ''}>
+                tenants.map((tenant) => {
+                  const autoLocked = isExpiredMoreThan3Days(tenant.expiryDate) && tenant.status !== 'LOCKED';
+                  return (
+                  <tr key={tenant.id} className={tenant.status === 'LOCKED' ? 'row-locked' : ''}>
                     <td>
                       <div className="tenant-cell-info" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                         <div className="tenant-name">
                           {tenant.businessName}
                           {tenant.status === 'LOCKED' && <Lock size={12} className="inline-lock-icon" style={{ marginLeft: '6px' }} />}
+                          {autoLocked && (
+                            <span className="auto-lock-badge" title="Akan dikunci otomatis: expire date melebihi 3 hari">
+                              <AlertTriangle size={11} style={{ marginRight: '3px' }} />
+                              Auto-Lock
+                            </span>
+                          )}
                         </div>
                         <div className="tenant-email">{tenant.ownerEmail}</div>
                       </div>
@@ -436,7 +530,7 @@ function TenantManagement() {
                       </span>
                     </td>
                     <td>
-                      <span className="expiry-date">{tenant.expiryDate}</span>
+                      <span className={`expiry-date${autoLocked ? ' expiry-overdue' : ''}`}>{tenant.expiryDate}</span>
                     </td>
                     <td>
                       <div className="action-buttons text-right">
@@ -464,7 +558,8 @@ function TenantManagement() {
                       </div>
                     </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>

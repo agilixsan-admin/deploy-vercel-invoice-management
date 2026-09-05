@@ -12,6 +12,11 @@
   font-size: 13px;
 }
 
+.dashboard-realtime-clock {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
 .dashboard-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1290,4 +1295,120 @@
 
 .password-toggle-btn:hover {
   color: #f8fafc;
+}
+
+/* ------------------------------------------------------------- */
+/* Auto-Lock Badge (Tenant expired > 3 days)                     */
+/* ------------------------------------------------------------- */
+.auto-lock-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+  vertical-align: middle;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+/* Overdue expiry date highlight */
+.expiry-date.expiry-overdue {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------- */
+/* Email Spam Note (inside Add Tenant modal)                      */
+/* ------------------------------------------------------------- */
+.email-spam-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 7px 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 7px;
+  font-size: 11.5px;
+  color: #1d4ed8;
+  line-height: 1.5;
+}
+
+.email-spam-note svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ------------------------------------------------------------- */
+/* Confirm Tenant Step (Add Tenant modal step 2)                  */
+/* ------------------------------------------------------------- */
+.confirm-tenant-body {
+  padding: 20px 0 12px;
+  text-align: center;
+}
+
+.confirm-tenant-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fef3c7;
+  color: #d97706;
+  margin: 0 auto 12px;
+}
+
+.confirm-tenant-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.confirm-tenant-sub {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin: 0 0 16px;
+}
+
+.confirm-tenant-details {
+  background: #f8fafc;
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  overflow: hidden;
+  text-align: left;
+}
+
+.confirm-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 12px;
+}
+
+.confirm-detail-row:last-child {
+  border-bottom: none;
+}
+
+.confirm-detail-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  min-width: 100px;
+}
+
+.confirm-detail-value {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: right;
+  word-break: break-all;
 }

@@ -12,7 +12,11 @@ import {
   ClipboardList, 
   ArrowRight,
   SearchX,
-  LogOut
+  LogOut,
+  KeyRound,
+  Eye,
+  EyeOff,
+  CheckCircle2
 } from 'lucide-react';
 import { tenantService } from '../../services/tenantService';
 import './Topbar.css';
@@ -72,6 +76,16 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
   const [unpaidTenants, setUnpaidTenants] = useState([]);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  // Reset password modal state
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetForm, setResetForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [resetError, setResetError] = useState(null);
+  const [resetSuccess, setResetSuccess] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
 
   // Load unpaid tenants
   useEffect(() => {
@@ -139,8 +153,51 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_info');
-    navigate('/'); // Or /login depending on routing. In this app, / seems to be login based on standard setup, or '/login'. Actually navigate('/login') is safer, but I'll use '/' which usually redirects to login. Wait, let me check App.jsx route if possible, or just use navigate('/login'). Actually the user was at login page so I will navigate to '/login'.
-    // Let me just navigate to '/login'.
+    navigate('/');
+  };
+
+  const handleResetPassword = async () => {
+    setResetError(null);
+    if (!resetForm.currentPassword || !resetForm.newPassword || !resetForm.confirmPassword) {
+      setResetError('Semua field wajib diisi.');
+      return;
+    }
+    if (resetForm.newPassword !== resetForm.confirmPassword) {
+      setResetError('Password baru dan konfirmasi tidak cocok.');
+      return;
+    }
+    if (resetForm.newPassword.length < 6) {
+      setResetError('Password baru minimal 6 karakter.');
+      return;
+    }
+    setIsResetting(true);
+    try {
+      const apiClient = (await import('../../lib/apiClient')).default;
+      await apiClient.patch('/auth/change-password', {
+        currentPassword: resetForm.currentPassword,
+        newPassword: resetForm.newPassword,
+      });
+      setResetSuccess(true);
+      // Token otomatis expired: clear credentials and redirect to login
+      setTimeout(() => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user_info');
+        navigate('/login');
+      }, 2500);
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Gagal mereset password.';
+      setResetError(msg);
+      setIsResetting(false);
+    }
+  };
+
+  const openResetModal = () => {
+    setIsProfileOpen(false);
+    setResetForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setResetError(null);
+    setResetSuccess(false);
+    setIsResetting(false);
+    setShowResetModal(true);
   };
 
   const handleSubmitSearch = (e) => {
@@ -372,6 +429,11 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
                 <div className="profile-role">{userRole}</div>
               </div>
               <div className="profile-menu">
+                <button className="profile-menu-item profile-menu-item--reset" onClick={openResetModal}>
+                  <KeyRound size={16} />
+                  <span>Reset Password</span>
+                </button>
+                <div className="profile-menu-divider" />
                 <button className="profile-menu-item" onClick={() => {
                   localStorage.removeItem('access_token');
                   localStorage.removeItem('user_info');
@@ -385,6 +447,94 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
           )}
         </div>
       </div>
+
+      {/* ── Reset Password Modal ── */}
+      {showResetModal && (
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && !isResetting && setShowResetModal(false)}>
+          <div className="modal modal-sm">
+            <div className="modal-header">
+              <h2 className="modal-title">Reset Password</h2>
+              {!isResetting && !resetSuccess && (
+                <button className="modal-close" onClick={() => setShowResetModal(false)} type="button">
+                  <X size={18} />
+                </button>
+              )}
+            </div>
+
+            {resetSuccess ? (
+              <div className="reset-success-body">
+                <CheckCircle2 size={48} className="reset-success-icon" />
+                <p className="reset-success-title">Password berhasil diubah!</p>
+                <p className="reset-success-sub">Sesi Anda akan berakhir. Silakan login kembali dengan password baru.</p>
+              </div>
+            ) : (
+              <div style={{ padding: '0 0 4px' }}>
+                {resetError && <div className="modal-error-alert">{resetError}</div>}
+
+                <div className="form-group">
+                  <label className="form-label">Password Saat Ini</label>
+                  <div className="reset-pw-input-wrap">
+                    <input
+                      type={showCurrentPw ? 'text' : 'password'}
+                      className="form-control"
+                      placeholder="Password lama"
+                      value={resetForm.currentPassword}
+                      onChange={(e) => setResetForm({ ...resetForm, currentPassword: e.target.value })}
+                      disabled={isResetting}
+                    />
+                    <button type="button" className="reset-pw-eye" onClick={() => setShowCurrentPw(!showCurrentPw)} tabIndex={-1}>
+                      {showCurrentPw ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Password Baru</label>
+                  <div className="reset-pw-input-wrap">
+                    <input
+                      type={showNewPw ? 'text' : 'password'}
+                      className="form-control"
+                      placeholder="Min. 6 karakter"
+                      value={resetForm.newPassword}
+                      onChange={(e) => setResetForm({ ...resetForm, newPassword: e.target.value })}
+                      disabled={isResetting}
+                    />
+                    <button type="button" className="reset-pw-eye" onClick={() => setShowNewPw(!showNewPw)} tabIndex={-1}>
+                      {showNewPw ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Konfirmasi Password Baru</label>
+                  <div className="reset-pw-input-wrap">
+                    <input
+                      type={showConfirmPw ? 'text' : 'password'}
+                      className="form-control"
+                      placeholder="Ulangi password baru"
+                      value={resetForm.confirmPassword}
+                      onChange={(e) => setResetForm({ ...resetForm, confirmPassword: e.target.value })}
+                      disabled={isResetting}
+                    />
+                    <button type="button" className="reset-pw-eye" onClick={() => setShowConfirmPw(!showConfirmPw)} tabIndex={-1}>
+                      {showConfirmPw ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="modal-footer" style={{ borderTop: 'none', paddingTop: '8px' }}>
+                  <button className="btn btn-secondary" onClick={() => setShowResetModal(false)} disabled={isResetting}>
+                    Batal
+                  </button>
+                  <button className="btn btn-primary" onClick={handleResetPassword} disabled={isResetting}>
+                    {isResetting ? 'Memproses...' : 'Simpan Password'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }
