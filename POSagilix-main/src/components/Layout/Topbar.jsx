@@ -203,13 +203,15 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
   // Debounced real dynamic search across backend APIs
   useEffect(() => {
     const trimmed = query.trim();
-    if (!trimmed) {
+    if (!trimmed || trimmed.length < 2) {
       setSearchResults({ invoices: [], tenants: [], users: [], audit: [] });
       setSearchLoading(false);
       return;
     }
 
     setSearchLoading(true);
+    let isCancelled = false;
+
     const timer = setTimeout(async () => {
       try {
         const [tenantsRes, invoicesRes, usersRes, auditRes] = await Promise.allSettled([
@@ -218,6 +220,8 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
           userService.getUsers({ search: trimmed, limit: 5 }),
           auditService.getAuditLogs({ limit: 20 }),
         ]);
+
+        if (isCancelled) return;
 
         const matchedTenants = [];
         if (tenantsRes.status === 'fulfilled' && Array.isArray(tenantsRes.value)) {
@@ -296,11 +300,16 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
       } catch (err) {
         console.error('Failed to search database:', err);
       } finally {
-        setSearchLoading(false);
+        if (!isCancelled) {
+          setSearchLoading(false);
+        }
       }
-    }, 250);
+    }, 350);
 
-    return () => clearTimeout(timer);
+    return () => {
+      isCancelled = true;
+      clearTimeout(timer);
+    };
   }, [query]);
 
   const matchingInvoices = searchResults.invoices;
