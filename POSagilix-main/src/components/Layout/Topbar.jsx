@@ -19,6 +19,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { tenantService } from '../../services/tenantService';
+import { authService } from '../../services/authService';
 import './Topbar.css';
 
 const searchDatabase = {
@@ -162,28 +163,31 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
       setResetError('Semua field wajib diisi.');
       return;
     }
+    if (resetForm.newPassword.length < 8) {
+      setResetError('Password baru minimal 8 karakter.');
+      return;
+    }
     if (resetForm.newPassword !== resetForm.confirmPassword) {
       setResetError('Password baru dan konfirmasi tidak cocok.');
       return;
     }
-    if (resetForm.newPassword.length < 6) {
-      setResetError('Password baru minimal 6 karakter.');
+    if (resetForm.newPassword === resetForm.currentPassword) {
+      setResetError('Password baru tidak boleh sama dengan password lama.');
       return;
     }
     setIsResetting(true);
     try {
-      const apiClient = (await import('../../lib/apiClient')).default;
-      await apiClient.patch('/auth/change-password', {
-        currentPassword: resetForm.currentPassword,
-        newPassword: resetForm.newPassword,
-      });
+      await authService.resetPassword(
+        resetForm.currentPassword,
+        resetForm.newPassword,
+      );
       setResetSuccess(true);
-      // Token otomatis expired: clear credentials and redirect to login
+      // Sesi berakhir: bersihkan credentials dan redirect ke login
       setTimeout(() => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('user_info');
         navigate('/login');
-      }, 2500);
+      }, 2000);
     } catch (err) {
       const msg = err.response?.data?.message || err.message || 'Gagal mereset password.';
       setResetError(msg);
@@ -494,7 +498,7 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
                     <input
                       type={showNewPw ? 'text' : 'password'}
                       className="form-control"
-                      placeholder="Min. 6 karakter"
+                      placeholder="Min. 8 karakter"
                       value={resetForm.newPassword}
                       onChange={(e) => setResetForm({ ...resetForm, newPassword: e.target.value })}
                       disabled={isResetting}
