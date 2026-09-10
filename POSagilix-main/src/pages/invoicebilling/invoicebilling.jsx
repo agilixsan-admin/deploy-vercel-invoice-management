@@ -241,7 +241,9 @@ function InvoiceBilling() {
                       <span className="invoice-id-text">{inv.invoiceNumber || inv.id}</span>
                     </td>
                     <td>
-                      <span className="tenant-name-text">{inv.tenant?.businessName || inv.tenant}</span>
+                      <span className="tenant-name-text">
+                        {inv.tenant?.businessName || inv.tenant?.name || (typeof inv.tenant === 'string' ? inv.tenant : '-')}
+                      </span>
                     </td>
                     <td>
                       <span className="period-text">{inv.billingPeriod}</span>
@@ -267,7 +269,7 @@ function InvoiceBilling() {
                         >
                           <Eye size={14} />
                         </button>
-                        {inv.status === 'Unpaid' && (
+                        {['PENDING', 'OVERDUE', 'UNPAID'].includes(String(inv.status).toUpperCase()) && (
                           <button
                             className="btn btn-secondary btn-sm"
                             title="Mark as Paid"
@@ -276,7 +278,7 @@ function InvoiceBilling() {
                             Mark Paid
                           </button>
                         )}
-                        {inv.status === 'Unpaid' && (
+                        {['PENDING', 'OVERDUE', 'UNPAID'].includes(String(inv.status).toUpperCase()) && (
                           <button
                             className="btn btn-danger btn-sm"
                             title="Send Reminder"

@@ -7,7 +7,7 @@ function mapAuditLog(log) {
     timestamp: log.createdAt
       ? new Date(log.createdAt).toLocaleString('id-ID')
       : '-',
-    adminUser: log.actor?.email ?? log.actorId ?? '-',
+    adminUser: log.actor?.fullName || log.actor?.email || log.actorId || '-',
     actionText: log.action ?? '-',
     actionType: resolveActionType(log.action),
     target: log.targetType ? `${log.targetType} (${log.targetId ?? '-'})` : '-',

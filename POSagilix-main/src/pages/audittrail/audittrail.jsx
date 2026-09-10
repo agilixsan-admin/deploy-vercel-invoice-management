@@ -65,7 +65,6 @@ function AuditTrail() {
                 <th>TIMESTAMP</th>
                 <th>ADMIN USER</th>
                 <th>ACTION PERFORMED</th>
-                <th>TARGET</th>
                 <th>IP ADDRESS</th>
               </tr>
             </thead>
@@ -73,14 +72,14 @@ function AuditTrail() {
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={`skeleton-${i}`}>
-                    <td colSpan={5} style={{ padding: '8px 16px' }}>
+                    <td colSpan={4} style={{ padding: '8px 16px' }}>
                       <div className="skeleton skeleton-table-row"></div>
                     </td>
                   </tr>
                 ))
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="table-empty">
+                  <td colSpan={4} className="table-empty">
                     No log entries found matching your search or filters.
                   </td>
                 </tr>
@@ -106,9 +105,6 @@ function AuditTrail() {
                           </span>
                           <span className="action-text">{log.actionText}</span>
                         </div>
-                      </td>
-                      <td>
-                        <span className="target-text">{log.target}</span>
                       </td>
                       <td>
                         <span className="ip-address-text">{log.ipAddress}</span>
