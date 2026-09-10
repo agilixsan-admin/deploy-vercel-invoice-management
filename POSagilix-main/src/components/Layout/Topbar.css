@@ -370,7 +370,7 @@
   position: absolute;
   top: calc(100% + 8px);
   right: -10px;
-  width: 320px;
+  width: 360px;
   background: #ffffff;
   border: 1px solid var(--card-border);
   border-radius: 12px;
@@ -381,20 +381,64 @@
 }
 
 .notification-header {
-  padding: 12px 16px;
+  padding: 12px 16px 8px 16px;
   border-bottom: 1px solid #f1f5f9;
   background: #f8fafc;
 }
 
+.notification-header-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
 .notification-header h4 {
   margin: 0;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
+.notification-count-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  background: var(--red-light, #fee2e2);
+  color: var(--red-primary, #ef4444);
+  border-radius: 10px;
+}
+
+.notification-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.notification-tab-btn {
+  padding: 4px 10px;
+  border: none;
+  background: none;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.notification-tab-btn:hover {
+  background: #e2e8f0;
+  color: var(--text-primary);
+}
+
+.notification-tab-btn.active {
+  background: var(--blue-primary);
+  color: #ffffff;
+  font-weight: 600;
+}
+
 .notification-list {
-  max-height: 320px;
+  max-height: 340px;
   overflow-y: auto;
 }
 
@@ -409,7 +453,7 @@
 }
 
 .notification-item:hover {
-  background: #f1f5f9;
+  background: #f8fafc;
 }
 
 .notification-icon {
@@ -419,57 +463,119 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 15px;
   flex-shrink: 0;
 }
 
-.notification-icon.warning {
+.notification-icon.warning,
+.notification-icon.overdue {
   background: #fef2f2;
   color: var(--red-primary);
+}
+
+.notification-icon.pending {
+  background: #fffbeb;
+  color: #d97706;
+}
+
+.notification-icon.system {
+  background: #eff6ff;
+  color: var(--blue-primary);
 }
 
 .notification-content {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
 }
 
 .notification-title {
   margin: 0;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notification-badge-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.notification-badge-tag.overdue {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.notification-badge-tag.pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.notification-badge-tag.system {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.notification-subtitle {
+  margin: 0;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  line-height: 1.4;
 }
 
 .notification-time {
   margin: 0;
-  font-size: 11.5px;
-  color: var(--red-primary);
-  font-weight: 500;
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 .notification-empty {
-  padding: 24px 16px;
+  padding: 32px 16px;
   text-align: center;
   font-size: 13px;
   color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
 .notification-footer {
-  padding: 12px 16px;
-  text-align: center;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--blue-primary);
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
   background: #f8fafc;
   border-top: 1px solid #f1f5f9;
-  cursor: pointer;
-  transition: background 0.2s;
 }
 
-.notification-footer:hover {
-  background: var(--blue-light);
+.notification-footer-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue-primary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.notification-footer-link:hover {
+  text-decoration: underline;
 }
 
 /* ===== PROFILE DROPDOWN ===== */

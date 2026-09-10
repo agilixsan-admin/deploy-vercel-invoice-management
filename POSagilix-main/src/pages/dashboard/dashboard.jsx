@@ -6,6 +6,7 @@ import {
   MoreHorizontal, Send
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '../../hooks/useDashboard';
 import { invoiceService } from '../../services/invoiceService';
 import '../style.css';
@@ -227,27 +228,40 @@ function Dashboard() {
             <span>ACTION</span>
           </div>
           <div className="attention-list">
-            {pastDueClients.map((client) => (
-              <div key={client.id} className="attention-item">
-                <div className="attention-item-info">
-                  <span className="attention-item-name">{client.name}</span>
-                  <div className="attention-item-status">
-                    <span className="badge badge-red">PAST DUE</span>
-                    <span className="attention-item-date">{client.dueDate}</span>
-                  </div>
-                </div>
-                <button 
-                  className="btn btn-danger btn-sm reminder-btn"
-                  onClick={() => handleSendReminder(client.id)}
-                  disabled={remindingId === client.id}
-                >
-                  <Send size={11} />
-                  {remindingId === client.id ? '...' : 'Reminder'}
-                </button>
+            {pastDueClients.length === 0 ? (
+              <div style={{ padding: '28px 16px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                <CheckCircle size={22} style={{ color: '#10b981', margin: '0 auto 8px', display: 'block' }} />
+                No past due clients. All accounts are in good standing!
               </div>
-            ))}
+            ) : (
+              pastDueClients.map((client) => (
+                <div key={client.id} className="attention-item">
+                  <div
+                    className="attention-item-info"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => navigate(`/invoice/${client.id}`)}
+                  >
+                    <span className="attention-item-name">{client.name}</span>
+                    <div className="attention-item-status">
+                      <span className="badge badge-red">PAST DUE</span>
+                      <span className="attention-item-date">{client.dueDate}</span>
+                    </div>
+                  </div>
+                  <button 
+                    className="btn btn-danger btn-sm reminder-btn"
+                    onClick={() => handleSendReminder(client.id)}
+                    disabled={remindingId === client.id}
+                  >
+                    <Send size={11} />
+                    {remindingId === client.id ? '...' : 'Reminder'}
+                  </button>
+                </div>
+              ))
+            )}
           </div>
-          <button className="view-all-btn">View All {pastDueClients.length} Accounts</button>
+          <button className="view-all-btn" onClick={() => navigate('/invoice-billing')}>
+            View All {pastDueClients.length} Accounts
+          </button>
         </div>
       </div>
     </div>

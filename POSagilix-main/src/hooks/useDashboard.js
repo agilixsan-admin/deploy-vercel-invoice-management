@@ -44,7 +44,7 @@ export function useDashboard() {
         growthData: (growth || []).map(g => ({ month: g.month, tenants: g.count })),
         pastDueClients: unpaidInvoices.slice(0, 5).map(inv => ({
           id: inv.id,
-          name: inv.tenant?.businessName || 'Unknown Tenant',
+          name: inv.tenant?.businessName || inv.tenant?.name || (typeof inv.tenant === 'string' ? inv.tenant : null) || `Tenant #${(inv.tenantId || '').substring(0, 8)}`,
           dueDate: new Date(inv.dueDate).toLocaleDateString(),
         })),
       };

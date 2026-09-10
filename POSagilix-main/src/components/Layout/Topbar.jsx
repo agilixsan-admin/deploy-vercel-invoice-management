@@ -16,39 +16,20 @@ import {
   KeyRound,
   Eye,
   EyeOff,
-  CheckCircle2
+  CheckCircle2,
+  AlertCircle,
+  AlertTriangle,
+  Mail,
+  Clock
 } from 'lucide-react';
 import { tenantService } from '../../services/tenantService';
+import { invoiceService } from '../../services/invoiceService';
+import { notificationService } from '../../services/notificationService';
+import { userService } from '../../services/userService';
+import { auditService } from '../../services/auditService';
 import { authService } from '../../services/authService';
+import { useRealtimeEvents } from '../../hooks/useRealtimeEvents';
 import './Topbar.css';
-
-const searchDatabase = {
-  invoices: [
-    { id: 'INV-2024-10-001', title: 'INV-2024-10-001', subtitle: 'Warung Kopi Nusantara • Oct 2024', status: 'Unpaid', path: '/invoice-billing?search=INV-2024-10-001' },
-    { id: 'INV-2023-10-001', title: 'INV-2023-10-001', subtitle: 'Acme Corp Ltd. • Oct 2023', status: 'Paid', path: '/invoice-billing?search=INV-2023-10-001' },
-    { id: 'INV-2023-10-002', title: 'INV-2023-10-002', subtitle: 'Globex Technologies • Oct 2023', status: 'Unpaid', path: '/invoice-billing?search=INV-2023-10-002' },
-    { id: 'INV-2023-10-003', title: 'INV-2023-10-003', subtitle: 'Initech Solutions • Oct 2023', status: 'Draft', path: '/invoice-billing?search=INV-2023-10-003' },
-    { id: 'INV-2023-09-001', title: 'INV-2023-09-001', subtitle: 'Bengkel Jaya • Sep 2023', status: 'Paid', path: '/invoice-billing?search=INV-2023-09-001' },
-  ],
-  tenants: [
-    { id: 't1', title: 'Warung Kopi Nusantara', subtitle: 'owner@kopinusantara.id • 12 outlets', status: 'ACTIVE', path: '/tenant-management?search=Warung Kopi' },
-    { id: 't2', title: 'Toko Baju Trendy', subtitle: 'admin@bajutrendy.com • 3 outlets', status: 'PAST_DUE', path: '/tenant-management?search=Toko Baju' },
-    { id: 't3', title: 'Resto Padang Sejahtera', subtitle: 'contact@restopadang.id • 5 outlets', status: 'ACTIVE', path: '/tenant-management?search=Resto Padang' },
-    { id: 't4', title: 'Bengkel Jaya', subtitle: 'service@bengkeljaya.co.id • 2 outlets', status: 'ACTIVE', path: '/tenant-management?search=Bengkel Jaya' },
-  ],
-  users: [
-    { id: 'u1', title: 'Ahmad Fauzi', subtitle: 'ahmad.fauzi@agilix.id • Super Admin', status: 'Active', path: '/user-management?search=Ahmad' },
-    { id: 'u2', title: 'Siti Rahayu', subtitle: 'siti.rahayu@kopinusantara.id • Tenant Admin', status: 'Active', path: '/user-management?search=Siti' },
-    { id: 'u3', title: 'Budi Santoso', subtitle: 'budi.s@bajutrendy.com • Tenant Admin', status: 'Inactive', path: '/user-management?search=Budi' },
-    { id: 'u4', title: 'Dewi Lestari', subtitle: 'dewi@restopadang.id • Cashier', status: 'Active', path: '/user-management?search=Dewi' },
-    { id: 'u5', title: 'Rizky Pratama', subtitle: 'rizky@bengkeljaya.id • Cashier', status: 'Active', path: '/user-management?search=Rizky' },
-  ],
-  audit: [
-    { id: 'a1', title: 'Locked tenant account', subtitle: 'Warung Kopi Nusantara • admin.sys@agilix.com', status: 'Log', path: '/audit-trail?search=Locked' },
-    { id: 'a2', title: 'Posted invoice #INV-2024-08', subtitle: 'Toko Baju Trendy • finance.lead@agilix.com', status: 'Log', path: '/audit-trail?search=Posted' },
-    { id: 'a3', title: 'Reset user password', subtitle: 'support.tier1@agilix.com', status: 'Log', path: '/audit-trail?search=Reset' },
-  ]
-};
 
 export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) {
   const navigate = useNavigate();
@@ -73,8 +54,9 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
 
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
-  const [unpaidCount, setUnpaidCount] = useState(0);
-  const [unpaidTenants, setUnpaidTenants] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [notifTab, setNotifTab] = useState('all'); // 'all' | 'invoices' | 'system'
+  const [notifLoading, setNotifLoading] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -88,27 +70,243 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
   const [showNewPw, setShowNewPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
 
-  // Load unpaid tenants
-  useEffect(() => {
-    const fetchUnpaid = async () => {
-      try {
-        const tenants = await tenantService.getTenants({ status: 'PAST_DUE' });
-        setUnpaidTenants(tenants);
-        setUnpaidCount(tenants.length);
-      } catch (err) {
-        console.error('Failed to load unpaid tenants for notifications', err);
+  // Load unified notifications: overdue invoices, pending invoices, past due tenants, and system notifications
+  const fetchAllNotifications = async () => {
+    try {
+      setNotifLoading(true);
+      const [tenantsRes, invoicesRes, systemNotifsRes] = await Promise.allSettled([
+        tenantService.getTenants({ status: 'PAST_DUE' }),
+        invoiceService.getInvoices({ limit: 50 }),
+        notificationService.getNotifications({ limit: 15 }),
+      ]);
+
+      const items = [];
+
+      // 1. Past due tenants
+      if (tenantsRes.status === 'fulfilled' && Array.isArray(tenantsRes.value)) {
+        tenantsRes.value.forEach((t) => {
+          items.push({
+            id: `tenant-${t.id}`,
+            category: 'invoices',
+            type: 'tenant_past_due',
+            badge: 'Past Due',
+            badgeClass: 'overdue',
+            title: `${t.businessName} memiliki tunggakan`,
+            subtitle: `Status: PAST_DUE • Paket: ${t.planType || 'MONTHLY'}`,
+            time: 'Perlu Tindakan',
+            timestamp: new Date(t.updatedAt || t.createdAt || Date.now()).getTime(),
+            path: `/tenant-management?search=${encodeURIComponent(t.businessName)}`,
+          });
+        });
       }
-    };
-    fetchUnpaid();
+
+      // 2. Unpaid & Overdue Invoices
+      if (invoicesRes.status === 'fulfilled' && Array.isArray(invoicesRes.value)) {
+        const unpaidInvoices = invoicesRes.value.filter((inv) =>
+          ['PENDING', 'OVERDUE', 'UNPAID'].includes(String(inv.status).toUpperCase())
+        );
+        unpaidInvoices.forEach((inv) => {
+          const isOverdue =
+            inv.status === 'OVERDUE' ||
+            (inv.dueDate && new Date(inv.dueDate) < new Date());
+          const tenantName = inv.tenant?.businessName || inv.tenant?.name || 'Tenant';
+          const amountStr = `Rp ${Number(inv.amount || 0).toLocaleString('id-ID')}`;
+          const formattedDueDate = inv.dueDate
+            ? new Date(inv.dueDate).toLocaleDateString('id-ID', {
+                month: 'short',
+                day: 'numeric',
+              })
+            : '-';
+
+          items.push({
+            id: `invoice-${inv.id}`,
+            category: 'invoices',
+            type: isOverdue ? 'invoice_overdue' : 'invoice_pending',
+            badge: isOverdue ? 'Overdue' : 'Unpaid',
+            badgeClass: isOverdue ? 'overdue' : 'pending',
+            title: isOverdue
+              ? `Invoice ${inv.invoiceNumber || inv.id} Lewat Jatuh Tempo`
+              : `Invoice ${inv.invoiceNumber || inv.id} Menunggu Pembayaran`,
+            subtitle: `${tenantName} • ${amountStr} • Due: ${formattedDueDate}`,
+            time: isOverdue ? 'Lewat tempo' : 'Belum lunas',
+            timestamp: new Date(inv.createdAt || Date.now()).getTime(),
+            path: `/invoice/${inv.id}`,
+          });
+        });
+      }
+
+      // 3. System Notifications
+      if (systemNotifsRes.status === 'fulfilled' && Array.isArray(systemNotifsRes.value)) {
+        systemNotifsRes.value.forEach((n) => {
+          const recipientName = n.tenant?.businessName || n.recipient || 'User';
+          items.push({
+            id: `sys-${n.id}`,
+            category: 'system',
+            type: 'system_notification',
+            badge: n.status || 'Email',
+            badgeClass: 'system',
+            title: n.subject || `Pemberitahuan Sistem (${n.type})`,
+            subtitle: `Terkirim ke: ${recipientName} (${n.recipient || '-'})`,
+            time: n.createdAt
+              ? new Date(n.createdAt).toLocaleDateString('id-ID', {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+              : 'Baru saja',
+            timestamp: new Date(n.createdAt || Date.now()).getTime(),
+            path: '/invoice-billing',
+          });
+        });
+      }
+
+      // Sort: overdue first, then newest
+      items.sort((a, b) => {
+        if (a.type.includes('overdue') && !b.type.includes('overdue')) return -1;
+        if (!a.type.includes('overdue') && b.type.includes('overdue')) return 1;
+        return b.timestamp - a.timestamp;
+      });
+
+      setNotifications(items);
+    } catch (err) {
+      console.error('Failed to load notifications:', err);
+    } finally {
+      setNotifLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllNotifications();
   }, []);
 
-  // Filter items matching query
-  const trimmed = query.trim().toLowerCase();
-  const matchingInvoices = trimmed ? searchDatabase.invoices.filter(i => i.title.toLowerCase().includes(trimmed) || i.subtitle.toLowerCase().includes(trimmed)) : [];
-  const matchingTenants = trimmed ? searchDatabase.tenants.filter(t => t.title.toLowerCase().includes(trimmed) || t.subtitle.toLowerCase().includes(trimmed)) : [];
-  const matchingUsers = trimmed ? searchDatabase.users.filter(u => u.title.toLowerCase().includes(trimmed) || u.subtitle.toLowerCase().includes(trimmed)) : [];
-  const matchingAudit = trimmed ? searchDatabase.audit.filter(a => a.title.toLowerCase().includes(trimmed) || a.subtitle.toLowerCase().includes(trimmed)) : [];
+  // Realtime updates via SSE
+  useRealtimeEvents((eventObj) => {
+    if (
+      eventObj?.event &&
+      (eventObj.event.startsWith('invoice.') ||
+        eventObj.event.startsWith('tenant.') ||
+        eventObj.event.startsWith('notification.'))
+    ) {
+      fetchAllNotifications();
+    }
+  });
 
+  const [searchResults, setSearchResults] = useState({
+    invoices: [],
+    tenants: [],
+    users: [],
+    audit: [],
+  });
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  // Debounced real dynamic search across backend APIs
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setSearchResults({ invoices: [], tenants: [], users: [], audit: [] });
+      setSearchLoading(false);
+      return;
+    }
+
+    setSearchLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const [tenantsRes, invoicesRes, usersRes, auditRes] = await Promise.allSettled([
+          tenantService.getTenants({ search: trimmed, limit: 5 }),
+          invoiceService.getInvoices({ limit: 50 }),
+          userService.getUsers({ search: trimmed, limit: 5 }),
+          auditService.getAuditLogs({ limit: 20 }),
+        ]);
+
+        const matchedTenants = [];
+        if (tenantsRes.status === 'fulfilled' && Array.isArray(tenantsRes.value)) {
+          tenantsRes.value.forEach((t) => {
+            matchedTenants.push({
+              id: t.id,
+              title: t.businessName,
+              subtitle: `${t.ownerEmail || t.ownerName || '-'} • ${t.outletCount || 1} outlets`,
+              status: t.status,
+              path: `/tenant-management?search=${encodeURIComponent(t.businessName)}`,
+            });
+          });
+        }
+
+        const matchedInvoices = [];
+        if (invoicesRes.status === 'fulfilled' && Array.isArray(invoicesRes.value)) {
+          const lower = trimmed.toLowerCase();
+          const filtered = invoicesRes.value.filter(
+            (inv) =>
+              (inv.invoiceNumber && inv.invoiceNumber.toLowerCase().includes(lower)) ||
+              (inv.tenant?.businessName && inv.tenant.businessName.toLowerCase().includes(lower)) ||
+              (inv.billingPeriod && inv.billingPeriod.toLowerCase().includes(lower)) ||
+              (inv.id && inv.id.toLowerCase().includes(lower))
+          );
+          filtered.slice(0, 5).forEach((inv) => {
+            const tenantName = inv.tenant?.businessName || inv.tenant?.name || 'Tenant';
+            matchedInvoices.push({
+              id: inv.id,
+              title: inv.invoiceNumber || inv.id,
+              subtitle: `${tenantName} • ${inv.billingPeriod} • Rp ${Number(inv.amount || 0).toLocaleString('id-ID')}`,
+              status: inv.status,
+              path: `/invoice/${inv.id}`,
+            });
+          });
+        }
+
+        const matchedUsers = [];
+        if (usersRes.status === 'fulfilled' && Array.isArray(usersRes.value)) {
+          usersRes.value.forEach((u) => {
+            matchedUsers.push({
+              id: u.id,
+              title: u.fullName || u.email,
+              subtitle: `${u.email} • ${u.role}`,
+              status: u.isActive ? 'Active' : 'Inactive',
+              path: `/user-management?search=${encodeURIComponent(u.fullName || u.email)}`,
+            });
+          });
+        }
+
+        const matchedAudit = [];
+        if (auditRes.status === 'fulfilled' && auditRes.value?.items) {
+          const lower = trimmed.toLowerCase();
+          const filtered = auditRes.value.items.filter(
+            (a) =>
+              (a.actionText && a.actionText.toLowerCase().includes(lower)) ||
+              (a.adminUser && a.adminUser.toLowerCase().includes(lower)) ||
+              (a.ipAddress && a.ipAddress.toLowerCase().includes(lower))
+          );
+          filtered.slice(0, 5).forEach((a) => {
+            matchedAudit.push({
+              id: a.id,
+              title: a.actionText,
+              subtitle: `${a.adminUser} • ${a.timestamp}`,
+              status: 'Log',
+              path: '/audit-trail',
+            });
+          });
+        }
+
+        setSearchResults({
+          tenants: matchedTenants,
+          invoices: matchedInvoices,
+          users: matchedUsers,
+          audit: matchedAudit,
+        });
+      } catch (err) {
+        console.error('Failed to search database:', err);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  const matchingInvoices = searchResults.invoices;
+  const matchingTenants = searchResults.tenants;
+  const matchingUsers = searchResults.users;
+  const matchingAudit = searchResults.audit;
   const totalResults = matchingInvoices.length + matchingTenants.length + matchingUsers.length + matchingAudit.length;
 
   // Handle outside click to close dropdowns
@@ -211,6 +409,28 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
     setIsOpen(false);
   };
 
+  const filteredNotifications = notifications.filter((item) => {
+    if (notifTab === 'invoices') return item.category === 'invoices';
+    if (notifTab === 'system') return item.category === 'system';
+    return true;
+  });
+
+  const getNotifIcon = (type) => {
+    if (type === 'invoice_overdue' || type === 'tenant_past_due') {
+      return <AlertCircle size={15} />;
+    }
+    if (type === 'invoice_pending') {
+      return <Clock size={15} />;
+    }
+    return <Mail size={15} />;
+  };
+
+  const getNotifIconClass = (type) => {
+    if (type === 'invoice_overdue' || type === 'tenant_past_due') return 'overdue';
+    if (type === 'invoice_pending') return 'pending';
+    return 'system';
+  };
+
   return (
     <header className="topbar">
       {/* Toggle button */}
@@ -261,11 +481,16 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
         {/* Search Results Floating Palette */}
         {isOpen && query.trim().length > 0 && (
           <div className="topbar-search-dropdown">
-            {totalResults === 0 ? (
+            {searchLoading ? (
+              <div className="topbar-search-empty" style={{ padding: '24px 16px' }}>
+                <p className="empty-title" style={{ fontSize: '13px', margin: 0 }}>Searching across database...</p>
+                <p className="empty-sub">Looking up tenants, invoices, users, and audit logs.</p>
+              </div>
+            ) : totalResults === 0 ? (
               <div className="topbar-search-empty">
                 <SearchX size={28} className="empty-icon" />
                 <p className="empty-title">No results found for "{query}"</p>
-                <p className="empty-sub">Try searching by ID, tenant name, user email, or invoice number.</p>
+                <p className="empty-sub">Try searching by tenant name, user email, or invoice number.</p>
               </div>
             ) : (
               <div className="topbar-search-results">
@@ -384,42 +609,108 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
             title="Notifications"
           >
             <Bell size={18} />
-            {unpaidCount > 0 && (
-              <span className="topbar-notification-badge">{unpaidCount}</span>
+            {notifications.length > 0 && (
+              <span className="topbar-notification-badge">{notifications.length}</span>
             )}
           </button>
           
           {isNotifOpen && (
             <div className="notification-dropdown">
               <div className="notification-header">
-                <h4>Notifications</h4>
+                <div className="notification-header-title">
+                  <h4>Notifications</h4>
+                  {notifications.length > 0 && (
+                    <span className="notification-count-badge">
+                      {notifications.length} Total
+                    </span>
+                  )}
+                </div>
+                <div className="notification-tabs">
+                  <button
+                    type="button"
+                    className={`notification-tab-btn ${notifTab === 'all' ? 'active' : ''}`}
+                    onClick={() => setNotifTab('all')}
+                  >
+                    All ({notifications.length})
+                  </button>
+                  <button
+                    type="button"
+                    className={`notification-tab-btn ${notifTab === 'invoices' ? 'active' : ''}`}
+                    onClick={() => setNotifTab('invoices')}
+                  >
+                    Tagihan ({notifications.filter((n) => n.category === 'invoices').length})
+                  </button>
+                  <button
+                    type="button"
+                    className={`notification-tab-btn ${notifTab === 'system' ? 'active' : ''}`}
+                    onClick={() => setNotifTab('system')}
+                  >
+                    Sistem ({notifications.filter((n) => n.category === 'system').length})
+                  </button>
+                </div>
               </div>
+
               <div className="notification-list">
-                {unpaidTenants.length > 0 ? (
-                  unpaidTenants.map(t => (
-                    <div key={t.id} className="notification-item" onClick={() => {
-                      setIsNotifOpen(false);
-                      navigate(`/tenant-management?search=${encodeURIComponent(t.businessName)}`);
-                    }}>
-                      <div className="notification-icon warning">!</div>
+                {notifLoading ? (
+                  <div className="notification-empty">Memuat notifikasi...</div>
+                ) : filteredNotifications.length > 0 ? (
+                  filteredNotifications.map((n) => (
+                    <div
+                      key={n.id}
+                      className="notification-item"
+                      onClick={() => {
+                        setIsNotifOpen(false);
+                        navigate(n.path);
+                      }}
+                    >
+                      <div className={`notification-icon ${getNotifIconClass(n.type)}`}>
+                        {getNotifIcon(n.type)}
+                      </div>
                       <div className="notification-content">
-                        <p className="notification-title">{t.businessName} is unpaid</p>
-                        <p className="notification-time">Status: PAST_DUE</p>
+                        <div className="notification-title-row">
+                          <p className="notification-title">{n.title}</p>
+                          <span className={`notification-badge-tag ${n.badgeClass}`}>
+                            {n.badge}
+                          </span>
+                        </div>
+                        <p className="notification-subtitle">{n.subtitle}</p>
+                        <p className="notification-time">{n.time}</p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="notification-empty">No new notifications</div>
+                  <div className="notification-empty">
+                    <CheckCircle2 size={24} style={{ color: '#10b981' }} />
+                    <p style={{ margin: 0, fontWeight: 500 }}>Tidak ada notifikasi baru</p>
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                      Semua tagihan dan sistem dalam status aman.
+                    </span>
+                  </div>
                 )}
               </div>
-              {unpaidTenants.length > 0 && (
-                <div className="notification-footer" onClick={() => {
-                  setIsNotifOpen(false);
-                  navigate('/tenant-management?status=PAST_DUE');
-                }}>
-                  View all unpaid tenants
-                </div>
-              )}
+
+              <div className="notification-footer">
+                <button
+                  type="button"
+                  className="notification-footer-link"
+                  onClick={() => {
+                    setIsNotifOpen(false);
+                    navigate('/invoice-billing');
+                  }}
+                >
+                  Kelola Invoice &rarr;
+                </button>
+                <button
+                  type="button"
+                  className="notification-footer-link"
+                  onClick={() => {
+                    setIsNotifOpen(false);
+                    navigate('/tenant-management');
+                  }}
+                >
+                  Kelola Tenant &rarr;
+                </button>
+              </div>
             </div>
           )}
         </div>
