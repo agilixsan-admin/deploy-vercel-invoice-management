@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import apiClient from '../../lib/apiClient';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage('');
     try {
-      // Import apiClient directly where it's used to avoid top-level import issue if preferred,
-      // but top-level import is better. Let's assume we do top-level import.
-      const apiClient = (await import('../../lib/apiClient')).default;
       const response = await apiClient.post('/auth/login', { email, password });
       
       if (response.data && response.data.accessToken) {
@@ -43,11 +43,25 @@ const Login = () => {
         navigate('/dashboard');
         
       } else {
-         alert('Login failed. No token received.');
+        setErrorMessage('Login gagal. Token otentikasi tidak diterima.');
       }
     } catch (error) {
       console.error('Login error', error);
-      alert(error.response?.data?.message || 'Login failed. Please check your credentials.');
+      const serverMsg = error.response?.data?.message;
+      let displayMsg = 'Password atau email salah';
+      
+      if (typeof serverMsg === 'string') {
+        const lower = serverMsg.toLowerCase();
+        if (lower.includes('invalid') || lower.includes('password') || lower.includes('email') || lower.includes('credential')) {
+          displayMsg = 'Password atau email salah';
+        } else {
+          displayMsg = serverMsg;
+        }
+      } else if (Array.isArray(serverMsg) && serverMsg.length > 0) {
+        displayMsg = serverMsg.join(', ');
+      }
+      
+      setErrorMessage(displayMsg);
     } finally {
       setIsLoading(false);
     }
@@ -78,7 +92,10 @@ const Login = () => {
                 type="email" 
                 placeholder="Enter your email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errorMessage) setErrorMessage('');
+                }}
                 required
               />
             </div>
@@ -92,7 +109,10 @@ const Login = () => {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errorMessage) setErrorMessage('');
+                }}
                 style={{ paddingRight: '44px' }}
                 required
               />
@@ -128,6 +148,13 @@ const Login = () => {
               </>
             )}
           </button>
+
+          {errorMessage && (
+            <div className="login-error-alert" role="alert">
+              <AlertCircle size={16} className="login-error-icon" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
         </form>
         
         <p className="login-footer">
