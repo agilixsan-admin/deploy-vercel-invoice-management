@@ -28,8 +28,10 @@ export default function DatePicker({
   disabled = false,
   required = false,
   className = '',
+  placement = 'auto', // 'auto' | 'top' | 'bottom'
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [computedPlacement, setComputedPlacement] = useState('bottom');
   const containerRef = useRef(null);
 
   // Parse initial date or default to current date
@@ -47,6 +49,39 @@ export default function DatePicker({
   const [viewYear, setViewYear] = useState(initialDate.getFullYear());
   const [viewMonth, setViewMonth] = useState(initialDate.getMonth());
   const [viewMode, setViewMode] = useState(mode === 'month' ? 'month' : 'days'); // 'days' | 'months' | 'years'
+
+  // Dynamic placement detection (auto flip top/bottom based on available screen space)
+  useEffect(() => {
+    if (!isOpen || !containerRef.current) return;
+
+    if (placement === 'top' || placement === 'bottom') {
+      setComputedPlacement(placement);
+      return;
+    }
+
+    const updatePlacement = () => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const dropdownEstimatedHeight = 320;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+
+      if (spaceBelow < dropdownEstimatedHeight && spaceAbove > 180) {
+        setComputedPlacement('top');
+      } else {
+        setComputedPlacement('bottom');
+      }
+    };
+
+    updatePlacement();
+    window.addEventListener('resize', updatePlacement);
+    window.addEventListener('scroll', updatePlacement, true);
+
+    return () => {
+      window.removeEventListener('resize', updatePlacement);
+      window.removeEventListener('scroll', updatePlacement, true);
+    };
+  }, [isOpen, placement]);
 
   // Update view when value changes externally
   useEffect(() => {
@@ -237,7 +272,7 @@ export default function DatePicker({
       </div>
 
       {isOpen && (
-        <div className="custom-datepicker-dropdown">
+        <div className={`custom-datepicker-dropdown placement-${computedPlacement}`}>
           {/* Header */}
           <div className="datepicker-header">
             <button
