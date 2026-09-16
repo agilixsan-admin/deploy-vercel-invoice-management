@@ -70,37 +70,18 @@ export default function Topbar({ onMenuClick, isSidebarOpen, onToggleSidebar }) 
   const [showNewPw, setShowNewPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
 
-  // Load unified notifications: overdue invoices, pending invoices, past due tenants, and system notifications
+  // Load unified notifications: overdue invoices, pending invoices, and system notifications
   const fetchAllNotifications = async () => {
     try {
       setNotifLoading(true);
-      const [tenantsRes, invoicesRes, systemNotifsRes] = await Promise.allSettled([
-        tenantService.getTenants({ status: 'PAST_DUE' }),
+      const [invoicesRes, systemNotifsRes] = await Promise.allSettled([
         invoiceService.getInvoices({ limit: 50 }),
         notificationService.getNotifications({ limit: 15 }),
       ]);
 
       const items = [];
 
-      // 1. Past due tenants
-      if (tenantsRes.status === 'fulfilled' && Array.isArray(tenantsRes.value)) {
-        tenantsRes.value.forEach((t) => {
-          items.push({
-            id: `tenant-${t.id}`,
-            category: 'invoices',
-            type: 'tenant_past_due',
-            badge: 'Past Due',
-            badgeClass: 'overdue',
-            title: `${t.businessName} memiliki tunggakan`,
-            subtitle: `Status: PAST_DUE • Paket: ${t.planType || 'MONTHLY'}`,
-            time: 'Perlu Tindakan',
-            timestamp: new Date(t.updatedAt || t.createdAt || Date.now()).getTime(),
-            path: `/tenant-management?search=${encodeURIComponent(t.businessName)}`,
-          });
-        });
-      }
-
-      // 2. Unpaid & Overdue Invoices
+      // 1. Unpaid & Overdue Invoices
       if (invoicesRes.status === 'fulfilled' && Array.isArray(invoicesRes.value)) {
         const unpaidInvoices = invoicesRes.value.filter((inv) =>
           ['PENDING', 'OVERDUE', 'UNPAID'].includes(String(inv.status).toUpperCase())

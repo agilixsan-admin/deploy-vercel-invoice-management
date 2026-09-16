@@ -115,7 +115,7 @@ function Dashboard() {
           <h1 className="page-title">Welcome back, {userName} 👋</h1>
           <p className="page-subtitle dashboard-date dashboard-realtime-clock">{formatDateTime(now)}</p>
         </div>
-        <div className="page-actions">
+        {/* <div className="page-actions">
           <button className="btn btn-secondary">
             <Download size={14} />
             Export Report
@@ -124,7 +124,7 @@ function Dashboard() {
             <Plus size={14} />
             New Tenant
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Stats Row */}
@@ -259,9 +259,9 @@ function Dashboard() {
               ))
             )}
           </div>
-          <button className="view-all-btn" onClick={() => navigate('/invoice-billing')}>
+          {/* <button className="view-all-btn" onClick={() => navigate('/invoice-billing')}>
             View All {pastDueClients.length} Accounts
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
